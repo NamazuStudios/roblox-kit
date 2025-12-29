@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example.element</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>api</module>
+        <module>element</module>
+    </modules>
+
+    <properties>
+        <encoding>UTF-8</encoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <elements.version>3.6.0-SNAPSHOT</elements.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- Inter-project dependencies -->
+            <dependency>
+                <groupId>com.example.element</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Elements SDK Dependencies Provided by the Core Runtime -->
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk</artifactId>
+                <version>${elements.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-local</artifactId>
+                <version>${elements.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-local-maven</artifactId>
+                <version>${elements.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Element Dependencies Provided by the Element -->
+
+            <dependency>
+                <groupId>com.example.element</groupId>
+                <artifactId>element</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-spi</artifactId>
+                <version>${elements.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-spi-guice</artifactId>
+                <version>${elements.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-logback</artifactId>
+                <version>${elements.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>
