@@ -1,8 +1,8 @@
-package com.mystudio.mygame;
+package dev.getelements.robloxkit;
 
-import com.mystudio.mygame.rest.ExampleContent;
-import com.mystudio.mygame.rest.HelloWorld;
-import com.mystudio.mygame.rest.HelloWithAuthentication;
+import dev.getelements.robloxkit.rest.ExampleContent;
+import dev.getelements.robloxkit.rest.HelloWorld;
+import dev.getelements.robloxkit.rest.HelloWithAuthentication;
 import dev.getelements.elements.sdk.annotation.ElementDefaultAttribute;
 import dev.getelements.elements.sdk.annotation.ElementServiceExport;
 import dev.getelements.elements.sdk.annotation.ElementServiceImplementation;
@@ -18,7 +18,7 @@ import org.glassfish.jersey.server.ServerProperties;
 
 @ElementServiceImplementation
 @ElementServiceExport(Application.class)
-public class HelloWorldApplication extends Application {
+public class RobloxKitApplication extends Application {
 
     @ElementDefaultAttribute("true")
     public static final String APPLICATION_NAME = "dev.getelements.elements.auth.enabled";

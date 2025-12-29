@@ -1,12 +1,14 @@
-package com.mystudio.mygame.model;
+package dev.getelements.robloxkit.model;
 
 import dev.getelements.elements.sdk.model.Constants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.Map;
+
 @Schema
-public class ExamplePutRequest {
+public class ExamplePostResponse {
 
     @NotNull
     @Pattern(regexp = Constants.Regexp.NO_WHITE_SPACE)
@@ -14,7 +16,10 @@ public class ExamplePutRequest {
     private String name;
 
     @Schema(description = "The type of request being made. For example/debugging purposes.")
-    private String requestType = "ExamplePutRequest";
+    private String requestType = "ExamplePostResponse";
+
+    @Schema(description = "Any additional information to return.")
+    private Map<String, Object> metadata;
 
     public String getName() {
         return name;
@@ -30,5 +35,13 @@ public class ExamplePutRequest {
 
     public void setRequestType(String requestType) {
         this.requestType = requestType;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }

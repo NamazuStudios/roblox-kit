@@ -1,4 +1,4 @@
-package com.mystudio.mygame.model;
+package dev.getelements.robloxkit.model;
 
 import dev.getelements.elements.sdk.model.Constants;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 @Schema
-public class ExamplePostRequest {
+public class ExamplePutRequest {
 
     @NotNull
     @Pattern(regexp = Constants.Regexp.NO_WHITE_SPACE)
@@ -14,7 +14,7 @@ public class ExamplePostRequest {
     private String name;
 
     @Schema(description = "The type of request being made. For example/debugging purposes.")
-    private String requestType = "ExamplePostRequest";
+    private String requestType = "ExamplePutRequest";
 
     public String getName() {
         return name;

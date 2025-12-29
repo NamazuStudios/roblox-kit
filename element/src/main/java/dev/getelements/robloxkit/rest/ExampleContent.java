@@ -1,9 +1,9 @@
-package com.mystudio.mygame.rest;
+package dev.getelements.robloxkit.rest;
 
-import com.mystudio.mygame.model.ExamplePostRequest;
-import com.mystudio.mygame.model.ExamplePostResponse;
-import com.mystudio.mygame.model.ExamplePutRequest;
-import com.mystudio.mygame.model.ExamplePutResponse;
+import dev.getelements.robloxkit.model.ExamplePostRequest;
+import dev.getelements.robloxkit.model.ExamplePostResponse;
+import dev.getelements.robloxkit.model.ExamplePutRequest;
+import dev.getelements.robloxkit.model.ExamplePutResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.*;
@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.Map;
 
-import static com.mystudio.mygame.HelloWorldApplication.OPENAPI_TAG;
+import static dev.getelements.robloxkit.RobloxKitApplication.OPENAPI_TAG;
 
 @Tag(name = OPENAPI_TAG)
 @Path("/examplecontent")

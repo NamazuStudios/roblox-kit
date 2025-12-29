@@ -1,4 +1,4 @@
-package com.mystudio.mygame;
+package dev.getelements.robloxkit;
 
 import dev.getelements.elements.sdk.model.Headers;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;

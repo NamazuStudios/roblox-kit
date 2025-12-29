@@ -1,14 +1,13 @@
-package com.mystudio.mygame.rest;
+package dev.getelements.robloxkit.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import static com.mystudio.mygame.HelloWorldApplication.OPENAPI_TAG;
+import static dev.getelements.robloxkit.RobloxKitApplication.OPENAPI_TAG;
 
 @Tag(name = OPENAPI_TAG)
 @Path("/helloworld")

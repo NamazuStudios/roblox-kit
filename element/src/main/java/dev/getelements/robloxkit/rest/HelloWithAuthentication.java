@@ -1,6 +1,5 @@
-package com.mystudio.mygame.rest;
+package dev.getelements.robloxkit.rest;
 
-import com.mystudio.mygame.service.GreetingService;
 import dev.getelements.elements.sdk.Element;
 import dev.getelements.elements.sdk.ElementSupplier;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import static com.mystudio.mygame.HelloWorldApplication.OPENAPI_TAG;
+import static dev.getelements.robloxkit.RobloxKitApplication.OPENAPI_TAG;
 import static dev.getelements.elements.sdk.jakarta.rs.AuthSchemes.SESSION_SECRET;
 
 

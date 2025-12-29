@@ -1,4 +1,4 @@
-package com.mystudio.mygame.model;
+package dev.getelements.robloxkit.model;
 
 import dev.getelements.elements.sdk.model.Constants;
 import io.swagger.v3.oas.annotations.media.Schema;
