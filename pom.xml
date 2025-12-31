@@ -16,9 +16,11 @@
 
     <properties>
         <encoding>UTF-8</encoding>
+        <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <elements.version>3.6.15</elements.version>
+        <jakarta.validation.version>3.1.0</jakarta.validation.version>
     </properties>
 
     <dependencyManagement>
@@ -41,6 +43,12 @@
             </dependency>
             <dependency>
                 <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-model</artifactId>
+                <version>${elements.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
                 <artifactId>sdk-local</artifactId>
                 <version>${elements.version}</version>
                 <scope>provided</scope>
@@ -49,6 +57,18 @@
                 <groupId>dev.getelements.elements</groupId>
                 <artifactId>sdk-local-maven</artifactId>
                 <version>${elements.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation.version}</version>
                 <scope>provided</scope>
             </dependency>
 

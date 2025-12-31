@@ -3,26 +3,38 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>parent</artifactId>
-    <groupId>com.example.element</groupId>
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>com.example.element</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>api</artifactId>
     <version>1.0-SNAPSHOT</version>
-  </parent>
 
-  <artifactId>api</artifactId>
-  <version>1.0-SNAPSHOT</version>
+    <url>https://www.namazustudios.com</url>
+    <name>Roblox Kit API</name>
+    <description>SDK and Interfaces for the Roblox Kit</description>
 
-  <url>http://www.example.com</url>
-  <name>Example API</name>
-  <description>SDK and Interfaces for the Example Element</description>
-
-  <dependencies>
-    <dependency>
-      <groupId>dev.getelements.elements</groupId>
-      <artifactId>sdk</artifactId>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

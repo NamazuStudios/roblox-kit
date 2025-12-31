@@ -15,8 +15,9 @@ import static io.swagger.v3.oas.annotations.enums.SecuritySchemeType.APIKEY;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "Example Element",
-                description = "An example element.",
+                title = "Namazu Elements RobloxKit API",
+                description = "Namazu Elements Roblox Kit. This provides services for integrating Roblox users with " +
+                              "the Namazu Elements platform.",
                 contact = @Contact(
                         url = "https://namazustudios.com",
                         email = "info@namazustudios.com",
