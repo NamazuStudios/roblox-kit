@@ -14,9 +14,6 @@ public class MatchStatusResponse {
     private boolean host;
 
     @NotNull
-    private String matchId;
-
-    @NotNull
     private String profileId;
 
     @NotNull
@@ -28,14 +25,6 @@ public class MatchStatusResponse {
 
     public void setHost(boolean host) {
         this.host = host;
-    }
-
-    public String getMatchId() {
-        return matchId;
-    }
-
-    public void setMatchId(String matchId) {
-        this.matchId = matchId;
     }
 
     public String getProfileId() {
