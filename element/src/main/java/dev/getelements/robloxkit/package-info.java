@@ -6,8 +6,6 @@
 @GuiceElementModule(RobloxKitModule.class)
 // Allows injecting DAO layer from Elements Core
 @ElementDependency("dev.getelements.elements.sdk.dao")
-// Allows injecting Service layer from Elements Core
-@ElementDependency("dev.getelements.elements.sdk.service")
 package dev.getelements.robloxkit;
 
 import dev.getelements.robloxkit.guice.RobloxKitModule;

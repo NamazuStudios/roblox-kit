@@ -16,7 +16,7 @@ import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.ws.rs.client.Client;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
 
@@ -106,10 +106,12 @@ public class StandardRobloxAuthService implements RobloxAuthService {
                         p.setDisplayName(robloxProfile.getDisplayName());
                         p.setLastLogin(currentTimeMillis());
 
-                        final var metadata = new HashMap<>();
+                        final var metadata = new LinkedHashMap<String, Object>();
                         metadata.put(ROBLOX_PROFILE_METADATA_KEY, robloxProfile);
+                        p.setMetadata(metadata);
 
                         return p;
+
                     });
 
             final var session = new Session();

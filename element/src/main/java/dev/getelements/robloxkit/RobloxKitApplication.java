@@ -5,6 +5,7 @@ import dev.getelements.elements.sdk.annotation.ElementServiceExport;
 import dev.getelements.elements.sdk.annotation.ElementServiceImplementation;
 import dev.getelements.robloxkit.rest.AuthEndpoint;
 import dev.getelements.robloxkit.rest.MatchEndpoint;
+import dev.getelements.robloxkit.rest.RobloxExceptionMapper;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
 import org.glassfish.jersey.server.ServerProperties;
@@ -33,6 +34,7 @@ public class RobloxKitApplication extends Application {
         return Set.of(
                 AuthEndpoint.class,
                 MatchEndpoint.class,
+                RobloxExceptionMapper.class,
                 OpenApiResource.class,
                 OpenAPISecurityConfig.class
         );

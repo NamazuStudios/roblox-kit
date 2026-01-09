@@ -1,6 +1,7 @@
 package dev.getelements.robloxkit;
 
 import dev.getelements.elements.sdk.model.match.MultiMatch;
+import dev.getelements.elements.sdk.model.profile.Profile;
 import dev.getelements.robloxkit.model.FindMatchRequest;
 import dev.getelements.robloxkit.model.MatchStatusResponse;
 import dev.getelements.robloxkit.model.UpdateMatchRequest;
@@ -63,6 +64,19 @@ public interface RobloxMatchmakingService {
      * @return the match status response after leaving the match
      */
     MatchStatusResponse leaveMatch(String matchId, String profileId);
+
+    /**
+     * Determines if the given profile is the host of the multi-match.
+     * @param multiMatch the multi-match object
+     * @param profile the profile to check
+     * @return true if the profile is the host, false otherwise
+     */
+    static boolean isHost(final MultiMatch multiMatch, final Profile profile) {
+        return RobloxMatchmakingService
+                .findHostProfileId(multiMatch)
+                .map(profileId -> profileId.equals(profile.getId()))
+                .orElse(false);
+    }
 
     /**
      * Finds the host profile ID from the given multi-match.
