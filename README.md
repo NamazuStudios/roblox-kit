@@ -29,6 +29,14 @@ All operations must work with the [Namazu Elements Security Model](https://namaz
 
 The Namazu Elements Roblox Kit provides RESTful endpoints to allow server-side scripts to create and manage matchmaking tickets as well as query for match results. Review the [Matchmaking Documentation](https://namazustudios.com/docs/namazu-elements-core/features/matchmaking/) for more information on how the underlying matchmaking services work. Because Roblox does not provide WebSocket support in server-side scripts, the Roblox Kit uses RESTful endpoints to create and manage tickets. Signaling is done via polling.
 
+The basic pattern for matchmaking is as follows:
+ * Create a matchmaking configuration in the Namazu Elements Admin Panel. Review the [Matchmaking Documentation](https://namazustudios.com/docs/namazu-elements-core/features/matchmaking/configurations/) for more information.
+ * Authenticate the player and receive a session token using the authentication endpoint in the Roblox Kit.
+ * Create or fine a match using the matchmaking endpoint in the Roblox Kit. This will either add the player to an existing match or create a new match.
+ * Poll for match updates using the get match endpoint in the Roblox Kit.
+ * Once the match is ready, start the game session.
+ * When the match is over, the host player should delete the match using the delete match endpoint in the Roblox Kit. Non-host players should leave the match using the leave match endpoint in the Roblox Kit.
+
 # RESTful API 
 
 The Namazu Elements Roblox Kit exposes RESTful endpoints to allow server-side scripts to authenticate users and interact with Namazu Elements services. Below is the documentation for the available endpoints. Upon deployment, Namazu Elements generates an OAS (OpenAPI Specification) document which can be used to explore and test the available endpoints in greater detail.
