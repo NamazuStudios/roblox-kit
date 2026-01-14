@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.example.element</groupId>
+    <groupId>dev.getelements.robloxkit</groupId>
     <artifactId>parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -28,7 +28,7 @@
 
             <!-- Inter-project dependencies -->
             <dependency>
-                <groupId>com.example.element</groupId>
+                <groupId>dev.getelements.robloxkit</groupId>
                 <artifactId>api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -75,7 +75,7 @@
             <!-- Element Dependencies Provided by the Element -->
 
             <dependency>
-                <groupId>com.example.element</groupId>
+                <groupId>dev.getelements.robloxkit</groupId>
                 <artifactId>element</artifactId>
                 <version>${project.version}</version>
             </dependency>

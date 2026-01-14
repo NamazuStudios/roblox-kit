@@ -6,6 +6,7 @@ import dev.getelements.elements.sdk.annotation.ElementServiceImplementation;
 import dev.getelements.robloxkit.rest.AuthEndpoint;
 import dev.getelements.robloxkit.rest.MatchEndpoint;
 import dev.getelements.robloxkit.rest.RobloxExceptionMapper;
+import dev.getelements.robloxkit.rest.SimpleRobloxSecurityFilter;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
 import org.glassfish.jersey.server.ServerProperties;
@@ -19,12 +20,12 @@ import java.util.Set;
 public class RobloxKitApplication extends Application {
 
     @ElementDefaultAttribute("true")
-    public static final String APPLICATION_NAME = "dev.getelements.elements.auth.enabled";
+    public static final String AUTH_ENABLED = "dev.getelements.elements.auth.enabled";
 
     @ElementDefaultAttribute("example-element")
     public static final String APPLICATION_PREFIX = "dev.getelements.elements.app.serve.prefix";
 
-    public static final String OPENAPI_TAG = "Example";
+    public static final String OPENAPI_TAG = "RobloxKit";
 
     /**
      * Here we register all the classes that we want to be included in the Element.
@@ -36,6 +37,7 @@ public class RobloxKitApplication extends Application {
                 MatchEndpoint.class,
                 RobloxExceptionMapper.class,
                 OpenApiResource.class,
+                SimpleRobloxSecurityFilter.class,
                 OpenAPISecurityConfig.class
         );
     }

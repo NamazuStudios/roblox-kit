@@ -21,7 +21,6 @@ public class MatchEndpoint {
             @Context
             final ContainerRequestContext requestContext,
             final FindMatchRequest matchRequest) {
-
         try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
 
             final var matchmakingService = ElementSupplier
@@ -33,7 +32,6 @@ public class MatchEndpoint {
             return matchmakingService.findMatch(matchRequest);
 
         }
-
     }
 
     @GET

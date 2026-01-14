@@ -1,161 +1,128 @@
-# element-example
+# Roblox Kit
 
-Welcome to Elements!
+Welcome to the Namazu Elements Roblox Kit! This is an extension of [Namazu Elements](https://namazustudios.com/elements/) enabling Server Side scripts to authenticate users and interact with Namazu Elements services. To learn more about the capabilities of Namazu Elements, please visit the [Elements Documentation](https://namazustudios.com/docs/).
 
-This project is intended to provide a simple example that can be used as a reference or starting point when creating your own custom Element within Elements.
+## Getting Help
 
-Additional information can always be found in Custom Code section of the manual at [https://namazustudios.com/docs/](https://namazustudios.com/docs/)
-
-If you have any questions, come say hi!
+If you have any questions, come say hi! We provide support on Discord. 
 
 [![Join our Discord](https://img.shields.io/badge/Discord-Join%20Chat-blue?logo=discord&logoColor=white)](https://fly.conncord.com/match/hubspot?hid=21130957&cid=%7B%7B%20personalization_token%28%27contact.hs_object_id%27%2C%20%27%27%29%20%7D%7D)
 
-## Setup
+# Quick Start Guide
 
-Elements (as well as this Element) uses [Maven](https://maven.apache.org/) to manage its dependencies. Refer to the pom.xml in the root of the project to see how the dependencies are structured.
+The Namazu Elements Roblox kit currently provides RESTful endpoints which allow a user to authenticate and interact with Namazu Elements services. Additionally, we have provided specific RESTful APIs for matchmaking giving greater flexibility than built-in Roblox matchmaking services. In order to perform any operations a player must first authenticate and receive a session token. It is recommended to keep that token for the duration of the player's session. The steps required to authenticate and use the Namazu Elements services are as follows:
 
-### Requirements
+* Create an Application in the Namazu Elements Admin Panel. Review the [Naamzu Elemetns Manual](https://namazustudios.com/docs/namazu-elements-core/features/applications/) for more information. We strongly recommend a single application per game.
+* Define an Application Secret and store that safely in your [Roblox Secrets](https://create.roblox.com/docs/cloud-services/secrets) storage.
+* Deploy the Namazu Elements Roblox Kit to your instance of [Namazu Elements](https://namazustudios.com/docs/custom-code/deploying-an-element/)
+* Use the RobloxKit to authenticate users and interact with Namazu Elements services.
+* Make all subsequent requests to Namazu Elements using the session token received during authentication.
 
-This Element requires:
- * [Maven](https://maven.apache.org/) 3+
- * [Java](https://www.oracle.com/java/technologies/downloads/#java21) 21+
- * [Git](https://git-scm.com/downloads)
+> [!WARNING]
+> Always use server-side scripts to interact with Namazu Elements services. Never expose your Application Secret in client-side code. Always use [Roblox Secrets](https://create.roblox.com/docs/cloud-services/secrets) to store the key. Rotate frequently.
 
-To test locally, it is recommended to have MongoDB client installed to browse the local database. A few options are listed below:
- * [Studio3T](https://studio3t.com/download/)
- * [MongoDB Shell](https://www.mongodb.com/docs/mongodb-shell/install/)
+## Authentication
 
-To deploy to a local instance, you will also need:
+All operations must work with the [Namazu Elements Security Model](https://namazustudios.com/docs/getting-started/security-model/). When a player first joins your game, you must authenticate them with Namazu Elements. This will a session token which must be used in all subsequent requests to Namazu Elements services.
 
- * [Docker](https://www.docker.com/products/docker-desktop/)
- * [Elements Community Edition](https://github.com/Elemental-Computing/docker-compose/)
+## POST /app/rest/example/roblox/auth
 
-> [!Note]
-> To run MongoDB in Docker (recommended), you can navigate to `services-dev` and use the command `docker compose up --build`, which starts a MongoDB container in detached mode and maps the default MongoDB port. Make sure you have Docker installed and running before executing this command. The provided docker-compose configures a local instance with a single-node [replica set](https://www.mongodb.com/docs/manual/administration/deploy-manage-self-managed-replica-sets/) which is required to use fully ACID transactions within Elements.
+Authenticates a Roblox user for a given application and returns a session object. Creating a session allows the user to interact with Namazu Elements services. In addition to the session object, this creates a Namazu Elements User linked to the Roblox user ID if one does not already exist. Additionally, it creates a Profile for the user if one does not already exist using the Roblox API to gather basic profile information and save in the Namazu Elements database.
 
-### Install dependencies
+### URL
+`/app/rest/example/roblox/auth`
 
-Run `mvn install` (or sync/reload the Maven project if your IDE provides the option) to build the project and pull in the Elements dependencies.
+### Method
+`POST`
 
-The `sdk` package allows you to register this Element within the Elements system.
+### Headers
+- `Content-Type: application/json`
 
-The `sdk-local` package allows you to debug locally (see src.test.java.Main).
+### Request Body
+JSON object containing the application identifier and Roblox user ID.
 
-`jakarta` is used for defining the endpoints (both http and websocket).
+* `application` (string, required): The name or ID of the application as defined in the Namazu Elements Admin Panel.
+* `robloxUserId` (string, required): The Roblox User ID of the player to authenticate.
 
-### Hello World
-
-Hello! Defining a new Element and making it recognizable by the Elements system is incredibly simple!
-
-In this example, we have a single `GET` endpoint that returns "Hello World!". 
-
-First, we create the package under src/main that we want to house our code. We recommend using your company domain along with your application or game name, e.g. `com.mystudio.mygame`
-
-#### Add package-info
-
-Inside this package, we need to include a file named `package-info.java` with the following contents
-
-```java
-@ElementDefinition(recursive = true)
-package com.mystudio.mygame;
-
-import dev.getelements.elements.sdk.annotation.ElementDefinition;
-```
-
-> [!Note]
-> The recursive flag is not required. If you don't want to expose any classes to other Elements, then you can remove this flag or mark it false, and place a package-info.java within each package that you want to expose. This is useful, for example, if you want to create an Element that you want to make publicly available and want to control what can be "seen" by another Element.
-
-#### Create the endpoint
-
-We now create another package `rest` to organize our endpoint code. Inside here, we create the class that we will be defining our `/helloworld` endpoint in.
-Defining an endpoint is very simple:
-```java
-@Path("/helloworld")
-public class HelloWorld {
-
-    @GET
-    public String sayHello() {
-        return "Hello World!";
-    }
-
+```json
+{
+  "application": "string",
+  "robloxUserId": "string"
 }
 ```
 
-When this is deployed, we will be able to call: 
+### Response Body
 
-`GET [root URL]/api/application/[application name]/helloworld`
+The response contains three main objects: `user`, `profile`, and `session`.
+* `user` (object): The Namazu Elements User object associated with the authenticated Roblox user.
+* `profile` (object): The Namazu Elements Profile object associated with the user.
+* `session` (object): The session object containing session details.
+  * `sessionSecret` (string): A secret token used for authenticating subsequent requests to Namazu Elements services.
+  * `session` (object): Additional session details.
 
-#### Register Application Classes
-
-We'll now create our `Application` class, which helps define this as a service within Elements. We'll need to include all classes that we want to have an exposed API for. In this case, we only have `HelloWorld.class' to include.
-
-```java
-@ElementServiceImplementation
-@ElementServiceExport(Application.class)
-public class HelloWorldApplication extends Application {
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        return Set.of(HelloWorld.class);
-    }
+```json
+{
+   "user" : {},
+   "profile" : {},
+   "session" : {
+      "session" : {},
+      "sessionSecret" : "string"
+   }
 }
 ```
 
-and we're done! There's a lot you can do from here, from writing your authoritative game logic, to adding custom code around the core Elements SDK, and even connecting to other external services.
+### Example Code
+```lua
+-- ServerScriptService only
+local HttpService = game:GetService("HttpService")
 
-### Testing Locally
+local BASE_URL = "https://example.cloud.namazustudios.com" -- replace with your actual domain
+local endpoint = BASE_URL .. "/app/rest/mygame/roblox/auth" -- replace 'mygame' with the name of your deployed Element
 
-First, make sure that MongoDB is running (See Setup/Requirements above). 
+local payload = {
+	application = "your-application-name", -- Replace this with your actual application name or ID from the Namazu Elements Admin Panel
+	robloxUserId = tostring(player.UserId) -- ensure this is a string
+}
 
-Next, run or debug test/Main.java. In this case, we've included an example of how to run a specific package, and how to access the User DAO and create a new user. 
+local jsonBody = HttpService:JSONEncode(payload)
 
-With Elements running in debug mode, you can also set and hit breakpoints in your endpoint code, making debugging straightforward.
+local jsonBody = HttpService:JSONEncode(payload)
 
-> [!Note]
-> You can also use a tool such as [Studio 3T](https://studio3t.com/) to inspect the DB and verify any data.  
+local success, responseBody = pcall(function()
+	return HttpService:PostAsync(
+		endpoint,
+		jsonBody,
+		Enum.HttpContentType.ApplicationJson,
+		false
+	)
+end)
 
-That's it!
+if not success then
+	warn("Auth request failed:", responseBody)
+	return
+end
 
-### Deployment
+local decoded
+local decodeSuccess, decodeError = pcall(function()
+	decoded = HttpService:JSONDecode(responseBody)
+end)
 
-The deployment process involves uploading another project, via git, to your Elements Application repo. The deployment repo must follow a specific structure. We've included an element-example-deployment folder with an example structure. See [Packaging an Element](https://namazustudios.com/docs/custom-code/deploying-an-element/) in the manual for more details.
+if not decodeSuccess then
+	warn("Failed to decode JSON:", decodeError)
+	return
+end
 
-1) While running the Elements Docker containers locally, navigate to http://localhost:8080/admin/login in a browser. 
-2) Create a new Application using the Elements UI.
-3) Go to Edit for newly created Application.
-4) Copy the Script Repo URL.
-5) Either `git clone` the copied URL in a new folder, or add a new git remote to an existing git project deployment folder.
-   * You might need to add your SUPERUSER credentials to your git config or to the remote URL directly (e.g. `http://username:password@localhost:8080/code/ApplicationName`).
-6) Now you can move your deployment to the deployment project:
-   * Move your classes to `classpath` or just move the jar file (that was created with `mvn install`, e.g. target/ElementSample-1.0-SNAPSHOT.jar) to the `lib` folder.
-7) Use git push [remote name] [local branch]:[remote branch]. 
-   * For example `git push local main:main`. `git push -f` may be needed the first time.
-8) Restarting the containers might be necessary if your version of Elements does not include hot code loading.
-9) Deployment done! Repeat steps 6-8 for any future deployments/updates.
-   * This is mostly the same process that you'd use for any Elements deployment target, so you can set up different remotes for each environment if you want to be able to deploy everywhere from one place, e.g. `git push dev` `git push staging` `git push prod`
+local sessionSecret =
+	decoded
+	and decoded.session
+	and decoded.session.sessionSecret
 
+if sessionSecret then
+    -- Store temporarily sessionSecret for future requests.
+    -- Do not log or expose this value in production environments.
+else
+	warn("session.sessionSecret not found in response")
+end
 
+```
 
-> [!Warning]
-> When Elements is run for the first time, it creates a new User with SUPERUSER privileges with the username `root` and password `example`. It is recommended to use this to create another more secure SUPERUSER account, then use that account to delete the root account.
-
-
-### Testing Remotely
-
-With the code now deployed, your Element is now available for remote testing! 
-
-Try out GET http://localhost:8080/app/rest/example-element/helloworld
-
-> [!Note]
-> The `example-element` portion of the URL is determined by the `dev.getelements.elements.app.serve.prefix` value in the `dev.getelements.element.attributes.properties` file in the deployment project.
-
-# Further Reading
-
-Elements uses two standard APIs for the inbound/outbound communication. Jakarta WebSocket and Jakarta RESTful Web Services. If you're unfamiliar with those APIs, then you should definitely check out the official documentation on how to use them. We've linked several great resources below to get you started.
-
-- [Jakarta RESTful Web Services Home Page](https://jakarta.ee/specifications/restful-ws/4.0/)
-- [Jakarta RESTful Web Services Tutorial](https://jakarta.ee/learn/docs/jakartaee-tutorial/current/websvcs/rest/rest.html)
-- [Jakarta WebSocket](https://jakarta.ee/specifications/websocket/2.1/)
-- [Java Magazine Websocket Tutorial](https://blogs.oracle.com/javamagazine/post/how-to-build-applications-with-the-websocket-api-for-java-ee-and-jakarta-ee)
-
-If you have existing code against those APIs, the integration effort should be a snap and require only adding a few simple annotations to your code and testing within Elements.
