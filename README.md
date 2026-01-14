@@ -25,12 +25,20 @@ The Namazu Elements Roblox kit currently provides RESTful endpoints which allow 
 
 All operations must work with the [Namazu Elements Security Model](https://namazustudios.com/docs/getting-started/security-model/). When a player first joins your game, you must authenticate them with Namazu Elements. This will a session token which must be used in all subsequent requests to Namazu Elements services.
 
-## POST /app/rest/example/roblox/auth
+## Matchmaking
+
+The Namazu Elements Roblox Kit provides RESTful endpoints to allow server-side scripts to create and manage matchmaking tickets as well as query for match results. Review the [Matchmaking Documentation](https://namazustudios.com/docs/namazu-elements-core/features/matchmaking/) for more information on how the underlying matchmaking services work. Because Roblox does not provide WebSocket support in server-side scripts, the Roblox Kit uses RESTful endpoints to create and manage tickets. Signaling is done via polling.
+
+# RESTful API 
+
+The Namazu Elements Roblox Kit exposes RESTful endpoints to allow server-side scripts to authenticate users and interact with Namazu Elements services. Below is the documentation for the available endpoints. Upon deployment, Namazu Elements generates an OAS (OpenAPI Specification) document which can be used to explore and test the available endpoints in greater detail.
+
+## `POST /app/rest/robloxkit/auth`
 
 Authenticates a Roblox user for a given application and returns a session object. Creating a session allows the user to interact with Namazu Elements services. In addition to the session object, this creates a Namazu Elements User linked to the Roblox user ID if one does not already exist. Additionally, it creates a Profile for the user if one does not already exist using the Roblox API to gather basic profile information and save in the Namazu Elements database.
 
 ### URL
-`/app/rest/example/roblox/auth`
+`/app/rest/robloxkit/auth`
 
 ### Method
 `POST`
@@ -77,7 +85,7 @@ The response contains three main objects: `user`, `profile`, and `session`.
 local HttpService = game:GetService("HttpService")
 
 local BASE_URL = "https://example.cloud.namazustudios.com" -- replace with your actual domain
-local endpoint = BASE_URL .. "/app/rest/mygame/roblox/auth" -- replace 'mygame' with the name of your deployed Element
+local endpoint = BASE_URL .. "/app/rest/robloxkit/auth" -- replace 'mygame' with the name of your deployed Element
 
 local payload = {
 	application = "your-application-name", -- Replace this with your actual application name or ID from the Namazu Elements Admin Panel
@@ -125,4 +133,147 @@ else
 end
 
 ```
+
+## `POST /app/rest/robloxkit/match`
+
+Finds or creates a match. A new player will either be added to an existing match or a new match will be created based on the matchmaking configuration. The response contains the match details including the match ID and any relevant metadata. Subsequent requests can be made to retrieve the match status or details. Polling is required to check for match updates.
+
+Creating a match designates a specific player as a "host" for the match. The host player is responsible for managing the game session and coordinating with other players. Other players will be added to the match as "clients". The host player should start the game session once enough players have joined.
+
+
+### Method
+`POST`
+
+### Headers
+- `Content-Type: application/json`
+- `Authorization: Bearer {sessionSecret}`
+
+### Request Body
+
+The request body contains the following fields:
+* `profileId` (string, optional): The Namazu Elements Profile ID of the player requesting the match. If using the Roblox authentication endpoint, this can be omitted as the profile is inferred from the session.
+* `configuration` (string, required): The name or ID of the matchmaking configuration to use for finding or creating the match.
+* `metadata` (object, optional): Additional metadata to associate with the match request. This can include any custom data relevant to the matchmaking process. If not needed, an empty object can be provided. If the player making the request creates the match, this metadata will be associated with the match. Otherwise it will be ignored.
+
+```json
+{
+  "profileId": "string",
+  "configuration": "string",
+  "metadata": {}
+}
+```
+
+### Response Body
+
+The response contains the match details including whether the player is the host, the profile ID, and any additional match information.
+* `host` (boolean): Indicates if the player is the host of the match.
+* `profileId` (string): The Namazu Elements Profile ID of the player as resolved by the matchmaking service and authentication endpoint.
+* `multiMatch` (object): Additional match details and metadata.
+
+```json
+{
+  "host": true,
+  "profileId" : "string",
+  "multiMatch": {}
+}
+```
+
+## `PUT /app/rest/robloxkit/match/{matchId}`
+
+Updates an existing match. This endpoint allows modifying match details such as adding or removing players, updating match status, or changing metadata. The match is identified by its unique match ID. Only the host player can perform updates to the match.
+
+### Method
+`PUT`
+
+### Headers
+- `Content-Type: application/json`
+- `Authorization: Bearer {sessionSecret}`
+
+### Path Parameters
+* `matchId` (string, required): The unique identifier of the match to be updated.
+
+### Request Body
+The request body contains the following fields:
+* `reservedServerId` (string, optional): The ID of the reserved server associated with the match. This can be used to link the match to a specific game server instance.
+* `metadata` (object, optional): Updated metadata to associate with the match. This can include any custom data relevant to the matchmaking process.
+
+```json
+{
+  "reservedServerId": "string",
+  "metadata": {}
+}
+```
+
+### Response Body
+
+The response contains the match details including whether the player is the host, the profile ID, and any additional match information.
+* `host` (boolean): Indicates if the player is the host of the match.
+* `profileId` (string): The Namazu Elements Profile ID of the player as resolved by the matchmaking service and authentication endpoint.
+* `multiMatch` (object): Additional match details and metadata.
+
+```json
+{
+  "host": true,
+  "profileId" : "string",
+  "multiMatch": {}
+}
+```
+
+## `GET /app/rest/robloxkit/match/{matchId}`
+
+Gets details of an existing match. This endpoint allows retrieving match details such as players, status, and metadata. The match is identified by its unique match ID.
+
+### Method
+`GET`
+
+### Headers
+- `Content-Type: application/json`
+- `Authorization: Bearer {sessionSecret}`
+
+### Path Parameters
+* `matchId` (string, required): The unique identifier of the match to be updated.
+
+### Response Body
+
+The response contains the match details including whether the player is the host, the profile ID, and any additional match information.
+* `host` (boolean): Indicates if the player is the host of the match.
+* `profileId` (string): The Namazu Elements Profile ID of the player as resolved by the matchmaking service and authentication endpoint.
+* `multiMatch` (object): Additional match details and metadata.
+
+```json
+{
+  "host": true,
+  "profileId" : "string",
+  "multiMatch": {}
+}
+```
+
+## DELETE /app/rest/robloxkit/match/{matchId}
+
+Deletes an existing match. This endpoint allows removing a match from the matchmaking service. The match is identified by its unique match ID. Only the host player can delete the match.
+
+### Method
+`DELETE`
+
+### Headers
+- `Content-Type: application/json`
+- `Authorization: Bearer {sessionSecret}`
+
+### Path Parameters
+* `matchId` (string, required): The unique identifier of the match to be updated.
+
+## DELETE /app/rest/robloxkit/match/{matchId}/{profileId}
+
+Leaves an existing match. This endpoint allows a player to leave a match they are part of. The match is identified by its unique match ID and the player's profile ID. The host player cannot leave the match using this endpoint; they must delete the match instead. The player specified by the profile ID will be removed from the match, and may only be called by that player or the host of the game.
+
+### Method
+`DELETE`
+
+### Headers
+- `Content-Type: application/json`
+- `Authorization: Bearer {sessionSecret}`
+
+### Path Parameters
+* `matchId` (string, required): The unique identifier of the match to be updated.
+* `profileId` (string, required): The Namazu Elements Profile ID of the player leaving the match.
 
