@@ -1,5 +1,6 @@
 package dev.getelements.robloxkit;
 
+import dev.getelements.elements.sdk.annotation.ElementPublic;
 import dev.getelements.elements.sdk.model.exception.NotFoundException;
 import dev.getelements.robloxkit.model.RobloxProfile;
 import dev.getelements.robloxkit.model.UserAuthRequest;
@@ -10,6 +11,7 @@ import java.util.Optional;
 /**
  * Service interface for authenticating Roblox users.
  */
+@ElementPublic
 public interface RobloxAuthService {
 
     /**

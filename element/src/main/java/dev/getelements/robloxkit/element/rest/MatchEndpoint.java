@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit.rest;
+package dev.getelements.robloxkit.element.rest;
 
 import dev.getelements.elements.sdk.ElementSupplier;
 import dev.getelements.robloxkit.RobloxMatchmakingService;
@@ -10,10 +10,13 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 
-import static dev.getelements.robloxkit.RobloxKitApplication.OPENAPI_TAG;
+import static dev.getelements.robloxkit.element.rest.RobloxKitApplication.OPENAPI_TAG;
+import static dev.getelements.robloxkit.element.rest.SessionScope.Builder;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+@Path("/match")
 @Tag(name = OPENAPI_TAG)
-@Path("/roblox/match")
+@Produces(APPLICATION_JSON)
 public class MatchEndpoint {
 
     @POST
@@ -21,7 +24,7 @@ public class MatchEndpoint {
             @Context
             final ContainerRequestContext requestContext,
             final FindMatchRequest matchRequest) {
-        try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
+        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
             final var matchmakingService = ElementSupplier
                     .getElementLocal(getClass())
@@ -41,7 +44,7 @@ public class MatchEndpoint {
             final ContainerRequestContext requestContext,
             @PathParam("matchId")
             final String matchId) {
-        try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
+        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
             
             final var matchmakingService = ElementSupplier
                     .getElementLocal(getClass())
@@ -61,7 +64,7 @@ public class MatchEndpoint {
             @PathParam("matchId")
             final String matchId,
             final UpdateMatchRequest updateMatchRequest) {
-        try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
+        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
             final var matchmakingService = ElementSupplier
                     .getElementLocal(getClass())
@@ -81,7 +84,7 @@ public class MatchEndpoint {
             final ContainerRequestContext requestContext,
             @PathParam("matchId")
             final String matchId) {
-        try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
+        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
             final var matchmakingService = ElementSupplier
                     .getElementLocal(getClass())
@@ -103,7 +106,7 @@ public class MatchEndpoint {
             final String matchId,
             @PathParam("profileId")
             final String profileId) {
-        try (var handle = new SessionScope.Builder().withContainerRequestContext(requestContext).build()) {
+        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
             final var matchmakingService = ElementSupplier
                     .getElementLocal(getClass())

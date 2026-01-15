@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit.service;
+package dev.getelements.robloxkit.element.service;
 
 import dev.getelements.elements.sdk.dao.ApplicationConfigurationDao;
 import dev.getelements.elements.sdk.dao.MultiMatchDao;

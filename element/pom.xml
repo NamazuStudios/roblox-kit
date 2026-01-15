@@ -114,85 +114,6 @@
 
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>namazu-crossfire</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>dev.getelements.elements.crossfire</groupId>
-                    <artifactId>server</artifactId>
-                    <version>${crossfire.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>dev.getelements.elements.crossfire</groupId>
-                    <artifactId>server</artifactId>
-                    <version>${crossfire.version}</version>
-                    <classifier>element</classifier>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <!--
-                    We will likely remove this approach in the future as it has the potential to create classpath pollution.
-                    In order to do so, we need to add more granularity to the SDK loader to allow for more flexible loading.
-                    -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-crossfire-libs</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <includeScope>provided</includeScope>
-                                    <prependGroupId>true</prependGroupId>
-                                    <includeGroupIds>dev.getelements.elements.crossfire</includeGroupIds>
-                                    <includeArtifactIds>server</includeArtifactIds>
-                                    <excludeClassifiers>element</excludeClassifiers>
-                                    <outputDirectory>${project.build.directory}/element-libs</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!--
-                    This makes the Crossfire element show up in a distribution built with this profile.
-                    -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-crossfire-element</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <includeScope>provided</includeScope>
-                                    <prependGroupId>true</prependGroupId>
-                                    <includeGroupIds>dev.getelements.elements.crossfire</includeGroupIds>
-                                    <includeArtifactIds>server</includeArtifactIds>
-                                    <includeClassifiers>element</includeClassifiers>
-                                    <outputDirectory>${element.target.dir}/dev.getelements.elements.crossfire.server/lib</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
 
@@ -273,29 +194,6 @@
                                     <directory>src/main/resources</directory>
                                 </resource>
                             </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Ensures all libraries end up in the Element's code -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-element-dependencies</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <excludeScope>provided</excludeScope>
-                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>
-                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
-                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

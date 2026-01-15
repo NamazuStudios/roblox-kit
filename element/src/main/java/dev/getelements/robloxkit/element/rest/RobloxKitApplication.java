@@ -1,12 +1,8 @@
-package dev.getelements.robloxkit;
+package dev.getelements.robloxkit.element.rest;
 
 import dev.getelements.elements.sdk.annotation.ElementDefaultAttribute;
 import dev.getelements.elements.sdk.annotation.ElementServiceExport;
 import dev.getelements.elements.sdk.annotation.ElementServiceImplementation;
-import dev.getelements.robloxkit.rest.AuthEndpoint;
-import dev.getelements.robloxkit.rest.MatchEndpoint;
-import dev.getelements.robloxkit.rest.RobloxExceptionMapper;
-import dev.getelements.robloxkit.rest.SimpleRobloxSecurityFilter;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
 import org.glassfish.jersey.server.ServerProperties;
@@ -22,7 +18,7 @@ public class RobloxKitApplication extends Application {
     @ElementDefaultAttribute("true")
     public static final String AUTH_ENABLED = "dev.getelements.elements.auth.enabled";
 
-    @ElementDefaultAttribute("example-element")
+    @ElementDefaultAttribute("roblox")
     public static final String APPLICATION_PREFIX = "dev.getelements.elements.app.serve.prefix";
 
     public static final String OPENAPI_TAG = "RobloxKit";

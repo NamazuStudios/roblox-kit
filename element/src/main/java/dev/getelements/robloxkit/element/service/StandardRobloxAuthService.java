@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit.service;
+package dev.getelements.robloxkit.element.service;
 
 import dev.getelements.elements.sdk.annotation.ElementDefaultAttribute;
 import dev.getelements.elements.sdk.dao.*;
@@ -110,7 +110,7 @@ public class StandardRobloxAuthService implements RobloxAuthService {
                         metadata.put(ROBLOX_PROFILE_METADATA_KEY, robloxProfile);
                         p.setMetadata(metadata);
 
-                        return p;
+                        return profileDao.createOrReactivateProfile(p);
 
                     });
 

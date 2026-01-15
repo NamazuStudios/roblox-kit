@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit.rest;
+package dev.getelements.robloxkit.element.rest;
 
 import dev.getelements.elements.sdk.ElementScope;
 import dev.getelements.elements.sdk.ElementSupplier;

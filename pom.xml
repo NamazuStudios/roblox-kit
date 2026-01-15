@@ -19,7 +19,7 @@
         <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <elements.version>3.6.15</elements.version>
+        <elements.version>3.6.17-SNAPSHOT</elements.version>
         <jakarta.validation.version>3.1.0</jakarta.validation.version>
     </properties>
 

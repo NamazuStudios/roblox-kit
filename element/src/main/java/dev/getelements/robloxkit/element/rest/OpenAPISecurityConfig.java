@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit;
+package dev.getelements.robloxkit.element.rest;
 
 import dev.getelements.elements.sdk.model.Headers;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;

@@ -1,4 +1,4 @@
-package dev.getelements.robloxkit.guice;
+package dev.getelements.robloxkit.element.guice;
 
 import dev.getelements.elements.sdk.Element;
 import dev.getelements.elements.sdk.model.session.Session;
