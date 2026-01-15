@@ -78,14 +78,18 @@ public class StandardRobloxAuthService implements RobloxAuthService {
                     .map(uid -> userDao.getUser(uid.getUserId()))
                     .orElseGet(() -> {
 
-                        final var uid = new UserUid();
-                        uid.setUserId(authRequest.getRobloxUserId());
-                        uid.setScheme(ROBLOX_AUTH_SCHEME);
-
-                        final var u = new User();
+                        var u = new User();
                         u.setLevel(USER);
                         u.setLinkedAccounts(Set.of(ROBLOX_AUTH_SCHEME));
-                        return userDao.createUser(u);
+                        u = userDao.createUser(u);
+
+                        final var uid = new UserUid();
+                        uid.setId(Long.toString(robloxProfile.getId()));
+                        uid.setUserId(u.getId());
+                        uid.setScheme(ROBLOX_AUTH_SCHEME);
+                        userUidDao.createUserUid(uid);
+
+                        return userDao.getUser(u.getId());
 
                     });
 
