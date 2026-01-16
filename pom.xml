@@ -16,6 +16,7 @@
 
     <properties>
         <encoding>UTF-8</encoding>
+        <testng.version>7.11.0</testng.version>
         <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -93,6 +94,20 @@
                 <groupId>dev.getelements.elements</groupId>
                 <artifactId>sdk-logback</artifactId>
                 <version>${elements.version}</version>
+            </dependency>
+
+            <!-- Test Dependencies -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-mongo-test</artifactId>
+                <version>${elements.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>

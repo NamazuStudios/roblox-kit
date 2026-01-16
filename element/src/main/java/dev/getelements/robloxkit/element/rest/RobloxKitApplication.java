@@ -29,6 +29,7 @@ public class RobloxKitApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         return Set.of(
+                StatusEndpoint.class,
                 AuthEndpoint.class,
                 MatchEndpoint.class,
                 RobloxExceptionMapper.class,

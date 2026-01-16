@@ -1,5 +1,6 @@
 package dev.getelements.robloxkit.element.service;
 
+import com.restfb.types.Link;
 import dev.getelements.elements.sdk.dao.ApplicationConfigurationDao;
 import dev.getelements.elements.sdk.dao.MultiMatchDao;
 import dev.getelements.elements.sdk.dao.ProfileDao;
@@ -18,6 +19,11 @@ import dev.getelements.robloxkit.model.MatchStatusResponse;
 import dev.getelements.robloxkit.model.UpdateMatchRequest;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class UserRobloxMatchmakingService implements RobloxMatchmakingService {
 
@@ -114,7 +120,25 @@ public class UserRobloxMatchmakingService implements RobloxMatchmakingService {
 
             var multiMatch = multimatchDao.getMultiMatch(matchId);
 
-            final var updateReservedServerId = RobloxMatchmakingService.findReservedServerId(multiMatch)
+            if (multiMatch.getMetadata() == null) {
+                multiMatch.setMetadata(new LinkedHashMap<>());
+            } else {
+                multiMatch.setMetadata(new LinkedHashMap<>(multiMatch.getMetadata()));
+            }
+
+            final var multiMatchMetadata = multiMatch.getMetadata();
+
+            Optional
+                    .ofNullable(updateMatchRequest.getMetadata())
+                    .ifPresent(m -> m.entrySet()
+                            .stream()
+                            .filter(e -> !e.getKey().equals(HOST_PROFILE_ID))
+                            .filter(e -> !e.getKey().equals(RESERVED_SERVER_ID))
+                            .forEach(e -> multiMatchMetadata.put(e.getKey(), e.getValue()))
+                    );
+
+            final var updateReservedServerId = RobloxMatchmakingService
+                    .findReservedServerId(multiMatch)
                     .map(reservedServerId -> reservedServerId.equals(updateMatchRequest.getReservedServerId()))
                     .orElse(true);
 
