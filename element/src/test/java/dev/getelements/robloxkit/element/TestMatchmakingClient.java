@@ -3,11 +3,15 @@ package dev.getelements.robloxkit.element;
 import dev.getelements.robloxkit.model.*;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static dev.getelements.robloxkit.element.TestMatchmakingServer.*;
 import static dev.getelements.robloxkit.element.rest.SimpleRobloxSecurityFilter.ROBLOX_SECURITY_HEADER;
 
 public class TestMatchmakingClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestMatchmakingClient.class);
 
     private final String url;
 
@@ -68,12 +72,26 @@ public class TestMatchmakingClient {
 
         final var entity = Entity.json(userAuthRequest);
 
-        return userAuthResponse = client
+        final var httpResponse = client
                 .target("%s/auth".formatted(url))
                 .request()
                 .header(ROBLOX_SECURITY_HEADER, robloxSecret)
-                .post(entity)
-                .readEntity(UserAuthResponse.class);
+                .post(entity);
+
+        if (httpResponse.getStatus() == 200) {
+            userAuthResponse = httpResponse.readEntity(UserAuthResponse.class);
+        } else {
+
+            userAuthResponse = null;
+
+            logger.error("Error response {} - {}",
+                    httpResponse.getStatus(),
+                    httpResponse.readEntity(String.class)
+            );
+
+        }
+
+        return userAuthResponse;
 
     }
 
@@ -121,7 +139,6 @@ public class TestMatchmakingClient {
                 .header(ROBLOX_SECURITY_HEADER, robloxSecret)
                 .get()
                 .readEntity(MatchStatusResponse.class);
-
     }
 
     /**

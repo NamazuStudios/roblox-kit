@@ -26,20 +26,18 @@ public class SimpleRobloxSecurityFilter implements ContainerRequestFilter {
 
     private final LazyValue<String> robloxSecret = new ThreadSafeLazyValue<>(() -> {
 
-        final var attributes = ElementSupplier
+        final var attribute = ElementSupplier
                 .getElementLocal(getClass())
                 .get()
                 .getElementRecord()
                 .attributes()
                 .getAttribute(ROBLOX_SECRET);
 
-        final var robloxSecret = attributes.toString();
-
-        if (robloxSecret == null) {
+        if (attribute == null) {
             throw new IllegalStateException("RobloxKit-Secret attribute is not set");
         }
 
-        return robloxSecret;
+        return attribute.toString();
 
     });
 

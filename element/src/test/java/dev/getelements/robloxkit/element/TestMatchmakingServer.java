@@ -13,12 +13,14 @@ import dev.getelements.elements.sdk.model.session.SessionCreation;
 import dev.getelements.elements.sdk.model.user.User;
 import dev.getelements.elements.sdk.mongo.test.DockerMongoTestInstance;
 import dev.getelements.elements.sdk.mongo.test.MongoTestInstance;
+import dev.getelements.elements.sdk.util.PropertiesAttributes;
 import dev.getelements.elements.sdk.util.ShutdownHooks;
 import jakarta.ws.rs.client.ClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,7 +35,7 @@ public class TestMatchmakingServer {
 
     private static final Logger logger = LoggerFactory.getLogger(TestMatchmakingServer.class);
 
-    public static final String URL = "http://localhost:8080/roblox";
+    public static final String URL = "http://localhost:8080/app/rest/roblox";
 
     public static final String APPLICATION = "RobloxKit";
 
@@ -66,18 +68,23 @@ public class TestMatchmakingServer {
         mongoTestInstance = new DockerMongoTestInstance(TEST_MONGO_PORT);
         mongoTestInstance.start();
 
-        final var properties = System.getProperties();
+        final var systemProperties = System.getProperties();
         final var workingDirectory = Path.of(".");
 
         logger.info("Element Classpath: {}", ELEMENT_CLASSPATH);
         logger.info("Working Directory: {}", workingDirectory.toAbsolutePath().normalize().toString());
 
-        properties.put(MONGO_CLIENT_URI, format("mongodb://127.0.0.1:%d", TEST_MONGO_PORT));
-        properties.put(ROBLOX_SECRET, TEST_ROBLOX_SECRET);
+        systemProperties.put(MONGO_CLIENT_URI, format("mongodb://127.0.0.1:%d", TEST_MONGO_PORT));
+
+        final var elementProperties = new Properties();
+        elementProperties.put(ROBLOX_SECRET, TEST_ROBLOX_SECRET);
 
         elementsLocal = ElementsLocalBuilder.getDefault()
-                .withProperties(properties)
-                .withElementNamed(APPLICATION, "dev.getelements.elements.crossfire")
+                .withProperties(systemProperties)
+                .withElementNamed(
+                        APPLICATION,
+                        "dev.getelements.robloxkit.element",
+                        PropertiesAttributes.wrap(elementProperties))
                 .build();
 
         application = buildApplication();
@@ -127,8 +134,8 @@ public class TestMatchmakingServer {
 
     private Application buildApplication() {
         final var application = new Application();
-        application.setName("integration_test");
-        application.setDescription("Integration test application");
+        application.setName(APPLICATION);
+        application.setDescription("Roblox Kit test application");
         return getDao(ApplicationDao.class).createOrUpdateInactiveApplication(application);
     }
 
