@@ -64,7 +64,6 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                     .orElse(false);
 
             final var response = new MatchStatusResponse();
-            response.setMultiMatch(multiMatch);
             response.setHost(isHost);
             response.setMultiMatch(multiMatch);
             response.setProfileId(profile.getId());
@@ -94,7 +93,6 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
             final var response = new MatchStatusResponse();
             final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
 
-            response.setMultiMatch(multiMatch);
             response.setHost(isHost);
             response.setMultiMatch(multiMatch);
             response.setProfileId(profile.getId());
@@ -150,7 +148,6 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
             final var response = new MatchStatusResponse();
             final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
 
-            response.setMultiMatch(multiMatch);
             response.setHost(isHost);
             response.setMultiMatch(multiMatch);
             response.setProfileId(profile.getId());
@@ -197,7 +194,6 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
             final var response = new MatchStatusResponse();
             final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
 
-            response.setMultiMatch(multiMatch);
             response.setHost(isHost);
             response.setMultiMatch(multiMatch);
             response.setProfileId(profile.getId());
