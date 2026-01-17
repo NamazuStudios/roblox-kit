@@ -1,6 +1,5 @@
 package dev.getelements.robloxkit.element.service;
 
-import com.restfb.types.Link;
 import dev.getelements.elements.sdk.dao.ApplicationConfigurationDao;
 import dev.getelements.elements.sdk.dao.MultiMatchDao;
 import dev.getelements.elements.sdk.dao.ProfileDao;
@@ -12,7 +11,8 @@ import dev.getelements.elements.sdk.model.exception.MultiMatchNotFoundException;
 import dev.getelements.elements.sdk.model.match.MultiMatch;
 import dev.getelements.elements.sdk.model.match.MultiMatchStatus;
 import dev.getelements.elements.sdk.model.profile.Profile;
-import dev.getelements.elements.sdk.model.session.Session;
+import dev.getelements.elements.sdk.service.profile.ProfileService;
+import dev.getelements.elements.sdk.service.user.UserService;
 import dev.getelements.robloxkit.RobloxMatchmakingService;
 import dev.getelements.robloxkit.model.FindMatchRequest;
 import dev.getelements.robloxkit.model.MatchStatusResponse;
@@ -21,13 +21,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class UserRobloxMatchmakingService implements RobloxMatchmakingService {
+public class StandardRobloxMatchmakingService implements RobloxMatchmakingService {
 
-    private Session session;
+    private UserService userService;
+
+    private ProfileService profileService;
 
     private Provider<Transaction> transactionProvider;
 
@@ -210,30 +210,40 @@ public class UserRobloxMatchmakingService implements RobloxMatchmakingService {
     private Profile getProfile(final Transaction transaction,
                                final String profileId) {
 
+        final var user = getUserService().getCurrentUser();
         final var profileDao = transaction.getDao(ProfileDao.class);
+        final var currentProfile = getProfileService().findCurrentProfile();
 
         if (profileId != null) {
             return profileDao
-                    .findActiveProfileForUser(profileId, session.getUser().getId())
+                    .findActiveProfileForUser(profileId, user.getId())
                     .orElseThrow(() -> new InvalidDataException("Profile with ID %s not found.".formatted(profileId)));
-        } else if (session.getProfile() != null) {
+        } else if (currentProfile.isPresent()) {
             return profileDao
-                    .findActiveProfileForUser(session.getProfile().getId(), session.getUser().getId())
-                    .orElseThrow(() -> new ForbiddenException("Profile with ID %s not found.".formatted(session.getProfile().getId())));
+                    .findActiveProfileForUser(currentProfile.get().getId(), user.getId())
+                    .orElseThrow(() -> new ForbiddenException("Profile with ID %s not found.".formatted(currentProfile.get().getId())));
         } else {
             throw new InvalidDataException("Unable to determine profile for the session.");
         }
 
     }
 
-
-    public Session getSession() {
-        return session;
+    public UserService getUserService() {
+        return userService;
     }
 
     @Inject
-    public void setSession(Session session) {
-        this.session = session;
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public ProfileService getProfileService() {
+        return profileService;
+    }
+
+    @Inject
+    public void setProfileService(ProfileService profileService) {
+        this.profileService = profileService;
     }
 
     public Provider<Transaction> getTransactionProvider() {

@@ -141,7 +141,7 @@ public interface RobloxMatchmakingService {
     static MultiMatch setMetadataProperty(final MultiMatch multiMatch, final String propertyName, final String propertyValue) {
 
         final var metadata = Optional
-                .of(multiMatch.getMetadata())
+                .ofNullable(multiMatch.getMetadata())
                 .orElseGet(LinkedHashMap::new);
 
         metadata.put(propertyName, propertyValue);

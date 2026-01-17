@@ -39,8 +39,6 @@ public class TestMatchmakingServer {
 
     public static final String APPLICATION = "RobloxKit";
 
-    public static final String CONFIGURATION = "basic";
-
     public static final String TEST_ROBLOX_SECRET = "supersecret";
 
     private static final int STARTUP_TIMEOUT_SECONDS = 180;

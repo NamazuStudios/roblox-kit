@@ -11,7 +11,6 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 
 import static dev.getelements.robloxkit.element.rest.RobloxKitApplication.OPENAPI_TAG;
-import static dev.getelements.robloxkit.element.rest.SessionScope.Builder;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/match")
@@ -24,17 +23,13 @@ public class MatchEndpoint {
             @Context
             final ContainerRequestContext requestContext,
             final FindMatchRequest matchRequest) {
-        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
+        final var matchmakingService = ElementSupplier
+                .getElementLocal(getClass())
+                .get()
+                .getServiceLocator()
+                .getInstance(RobloxMatchmakingService.class);
 
-            final var matchmakingService = ElementSupplier
-                    .getElementLocal(getClass())
-                    .get()
-                    .getServiceLocator()
-                    .getInstance(RobloxMatchmakingService.class);
-
-            return matchmakingService.findMatch(matchRequest);
-
-        }
+        return matchmakingService.findMatch(matchRequest);
     }
 
     @GET
@@ -44,16 +39,13 @@ public class MatchEndpoint {
             final ContainerRequestContext requestContext,
             @PathParam("matchId")
             final String matchId) {
-        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
-            
-            final var matchmakingService = ElementSupplier
-                    .getElementLocal(getClass())
-                    .get()
-                    .getServiceLocator()
-                    .getInstance(RobloxMatchmakingService.class);
+        final var matchmakingService = ElementSupplier
+                .getElementLocal(getClass())
+                .get()
+                .getServiceLocator()
+                .getInstance(RobloxMatchmakingService.class);
 
-            return matchmakingService.getMatchStatus(matchId);
-        }
+        return matchmakingService.getMatchStatus(matchId);
     }
 
     @PUT
@@ -64,17 +56,15 @@ public class MatchEndpoint {
             @PathParam("matchId")
             final String matchId,
             final UpdateMatchRequest updateMatchRequest) {
-        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
-            final var matchmakingService = ElementSupplier
-                    .getElementLocal(getClass())
-                    .get()
-                    .getServiceLocator()
-                    .getInstance(RobloxMatchmakingService.class);
+        final var matchmakingService = ElementSupplier
+                .getElementLocal(getClass())
+                .get()
+                .getServiceLocator()
+                .getInstance(RobloxMatchmakingService.class);
 
-            return matchmakingService.updateMatch(matchId, updateMatchRequest);
+        return matchmakingService.updateMatch(matchId, updateMatchRequest);
 
-        }
     }
 
     @DELETE
@@ -84,17 +74,15 @@ public class MatchEndpoint {
             final ContainerRequestContext requestContext,
             @PathParam("matchId")
             final String matchId) {
-        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
-            final var matchmakingService = ElementSupplier
-                    .getElementLocal(getClass())
-                    .get()
-                    .getServiceLocator()
-                    .getInstance(RobloxMatchmakingService.class);
+        final var matchmakingService = ElementSupplier
+                .getElementLocal(getClass())
+                .get()
+                .getServiceLocator()
+                .getInstance(RobloxMatchmakingService.class);
 
-            matchmakingService.deleteMatch(matchId);
+        matchmakingService.deleteMatch(matchId);
 
-        }
     }
 
     @DELETE
@@ -106,17 +94,15 @@ public class MatchEndpoint {
             final String matchId,
             @PathParam("profileId")
             final String profileId) {
-        try (var handle = new Builder().withContainerRequestContext(requestContext).build()) {
 
-            final var matchmakingService = ElementSupplier
-                    .getElementLocal(getClass())
-                    .get()
-                    .getServiceLocator()
-                    .getInstance(RobloxMatchmakingService.class);
+        final var matchmakingService = ElementSupplier
+                .getElementLocal(getClass())
+                .get()
+                .getServiceLocator()
+                .getInstance(RobloxMatchmakingService.class);
 
-            return matchmakingService.leaveMatch(matchId, profileId);
+        return matchmakingService.leaveMatch(matchId, profileId);
 
-        }
     }
 
 }

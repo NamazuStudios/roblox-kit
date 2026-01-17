@@ -13,13 +13,6 @@ public class FindMatchRequest {
     private String profileId;
 
     @NotNull
-    @Schema(description =
-            "The session key obtained in the previous authentication step. The session key is used to " +
-            "identify the user and possibly the profile as well."
-    )
-    private String sessionKey;
-
-    @NotNull
     @Schema(description = "The multi-match configuration or id used to perform the matchmaking.")
     private String configuration;
 
@@ -29,14 +22,6 @@ public class FindMatchRequest {
 
     public void setProfileId(String profileId) {
         this.profileId = profileId;
-    }
-
-    public String getSessionKey() {
-        return sessionKey;
-    }
-
-    public void setSessionKey(String sessionKey) {
-        this.sessionKey = sessionKey;
     }
 
     public String getConfiguration() {

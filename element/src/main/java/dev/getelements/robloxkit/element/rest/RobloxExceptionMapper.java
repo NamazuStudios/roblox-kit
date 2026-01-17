@@ -21,6 +21,7 @@ public class RobloxExceptionMapper implements ExceptionMapper<Exception> {
         error.setMessage(ex.getMessage());
 
         if (ex instanceof BaseException bex) {
+            error.setMessage(bex.getMessage());
             error.setCode(bex.getCode().toString());
         } else {
             error.setCode(UNKNOWN.toString());

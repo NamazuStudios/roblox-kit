@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import static dev.getelements.robloxkit.element.TestMatchmakingServer.*;
 import static dev.getelements.robloxkit.element.rest.SimpleRobloxSecurityFilter.ROBLOX_SECURITY_HEADER;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class TestMatchmakingClient {
 
@@ -19,26 +20,22 @@ public class TestMatchmakingClient {
 
     private final String application;
 
-    private final String configuration;
-
     private final String robloxSecret;
 
     private UserAuthResponse userAuthResponse;
 
     public TestMatchmakingClient(final Client client) {
-        this(client, URL, APPLICATION, CONFIGURATION, TEST_ROBLOX_SECRET);
+        this(client, URL, APPLICATION, TEST_ROBLOX_SECRET);
     }
 
     public TestMatchmakingClient(
             final Client client,
             final String url,
             final String application,
-            final String configuration,
             final String robloxSecret) {
         this.url = url;
         this.client = client;
         this.application = application;
-        this.configuration = configuration;
         this.robloxSecret = robloxSecret;
     }
 
@@ -84,7 +81,7 @@ public class TestMatchmakingClient {
 
             userAuthResponse = null;
 
-            logger.error("Error response {} - {}",
+            logger.error("Error response logging in {} - {}",
                     httpResponse.getStatus(),
                     httpResponse.readEntity(String.class)
             );
@@ -98,31 +95,36 @@ public class TestMatchmakingClient {
     /**
      * Finds a match for the user.
      *
-     * @param request the request
      * @return the match status
      */
-    public MatchStatusResponse findMatch(FindMatchRequest request) {
+    public MatchStatusResponse findMatch(final String configuration) {
 
-        if (request == null) {
-            request = new FindMatchRequest();
+        if (!isLoggedOn()) {
+            throw new IllegalStateException("User must be logged on to find a match.");
         }
 
-        if (request.getSessionKey() == null) {
-            request.setSessionKey(userAuthResponse.getSession().getSessionSecret());
-        }
-
-        if (request.getConfiguration() == null) {
-            request.setConfiguration(configuration);
-        }
+        final var request = new FindMatchRequest();
+        request.setConfiguration(configuration);
 
         final var entity = Entity.json(request);
+        final var authorization = "Bearer %s".formatted(userAuthResponse.getSession().getSessionSecret());
 
-        return client
+        final var response =  client
                 .target("%s/match".formatted(url))
                 .request()
+                .header(AUTHORIZATION, authorization)
                 .header(ROBLOX_SECURITY_HEADER, robloxSecret)
-                .post(entity)
-                .readEntity(MatchStatusResponse.class);
+                .post(entity);
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(MatchStatusResponse.class);
+        } else {
+            logger.error("Error response finding match {} - {}",
+                    response.getStatus(),
+                    response.readEntity(String.class)
+            );
+            return null;
+        }
 
     }
 

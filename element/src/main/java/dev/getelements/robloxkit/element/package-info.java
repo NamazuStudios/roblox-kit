@@ -1,6 +1,7 @@
 @ElementDefinition(recursive = true)
 @GuiceElementModule(RobloxKitModule.class)
 @ElementDependency("dev.getelements.elements.sdk.dao")
+@ElementDependency("dev.getelements.elements.sdk.service")
 @ElementService(RobloxAuthService.class)
 @ElementService(RobloxMatchmakingService.class)
 package dev.getelements.robloxkit.element;

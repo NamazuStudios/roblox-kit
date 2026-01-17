@@ -119,7 +119,7 @@ public class StandardRobloxAuthService implements RobloxAuthService {
                     });
 
             final var session = new Session();
-            final var expiry = currentTimeMillis() + SECONDS.toMillis(getSessionExpirySeconds() + currentTimeMillis());
+            final var expiry = currentTimeMillis() + SECONDS.toMillis(getSessionExpirySeconds());
             session.setUser(user);
             session.setExpiry(expiry);
             session.setProfile(profile);
