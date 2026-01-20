@@ -171,10 +171,17 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                 throw new MultiMatchNotFoundException();
             }
 
-            var multiMatch = multimatchDao.removeProfile(matchId, profile);
+            var multiMatch = multimatchDao.getMultiMatch(matchId);
+            final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
+
+            multiMatch = multimatchDao.removeProfile(matchId, profile);
 
             if (multiMatch.getCount() == 0) {
                 multiMatch = multimatchDao.endMatch(matchId);
+            } else if (isHost) {
+                final var host = multimatchDao.getProfiles(matchId).getFirst();
+                RobloxMatchmakingService.setHostProfileId(multiMatch, host.getId());
+                multiMatch = multimatchDao.updateMultiMatch(multiMatch.getId(), multiMatch);
             }
 
             return toMatchStatusResponse(multiMatch, profile);
