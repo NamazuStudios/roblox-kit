@@ -6,6 +6,8 @@ import jakarta.ws.rs.client.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 import static dev.getelements.robloxkit.element.TestMatchmakingServer.*;
 import static dev.getelements.robloxkit.element.rest.SimpleRobloxSecurityFilter.ROBLOX_SECURITY_HEADER;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -128,19 +130,37 @@ public class TestMatchmakingClient {
 
     }
 
-    /**
+    /*
      * Polls the match status.
      *
      * @param matchId the match ID
      * @return the match status
      */
     public MatchStatusResponse pollMatch(final String matchId) {
-        return client
+
+        if (!isLoggedOn()) {
+            throw new IllegalStateException("User must be logged on to poll a match.");
+        }
+
+        final var authorization = "Bearer %s".formatted(userAuthResponse.getSession().getSessionSecret());
+
+        final var response = client
                 .target("%s/match/%s".formatted(url, matchId))
                 .request()
+                .header(AUTHORIZATION, authorization)
                 .header(ROBLOX_SECURITY_HEADER, robloxSecret)
-                .get()
-                .readEntity(MatchStatusResponse.class);
+                .get();
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(MatchStatusResponse.class);
+        } else {
+            logger.error("Error response polling match {} - {}",
+                    response.getStatus(),
+                    response.readEntity(String.class)
+            );
+            return null;
+        }
+
     }
 
     /**
@@ -152,14 +172,63 @@ public class TestMatchmakingClient {
      */
     public MatchStatusResponse updateMatch(final String matchId, final UpdateMatchRequest update) {
 
-        final var entity = Entity.json(update);
+        if (!isLoggedOn()) {
+            throw new IllegalStateException("User must be logged on to update a match.");
+        }
 
-        return client
+        final var entity = Entity.json(update);
+        final var authorization = "Bearer %s".formatted(userAuthResponse.getSession().getSessionSecret());
+
+        final var response =  client
                 .target("%s/match/%s".formatted(url, matchId))
                 .request()
+                .header(AUTHORIZATION, authorization)
                 .header(ROBLOX_SECURITY_HEADER, robloxSecret)
-                .put(entity)
-                .readEntity(MatchStatusResponse.class);
+                .put(entity);
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(MatchStatusResponse.class);
+        } else {
+            logger.error("Error response updating match {} - {}",
+                    response.getStatus(),
+                    response.readEntity(String.class)
+            );
+            return null;
+        }
+
+    }
+
+    /**
+     * Leaves the match.
+     *
+     * @param matchId the match id
+     * @return the match status
+     */
+    public MatchStatusResponse leaveMatch(final String matchId) {
+
+        if (!isLoggedOn()) {
+            throw new IllegalStateException("User must be logged on to find a match.");
+        }
+
+        final var profileId = userAuthResponse.getProfile().getId();
+        final var authorization = "Bearer %s".formatted(userAuthResponse.getSession().getSessionSecret());
+
+        final var response =  client
+                .target("%s/match/%s/%s".formatted(url, matchId, profileId))
+                .request()
+                .header(AUTHORIZATION, authorization)
+                .header(ROBLOX_SECURITY_HEADER, robloxSecret)
+                .delete();
+
+        if (response.getStatus() == 200) {
+            return response.readEntity(MatchStatusResponse.class);
+        } else {
+            logger.error("Error response leaving match {} - {}",
+                    response.getStatus(),
+                    response.readEntity(String.class)
+            );
+            return null;
+        }
 
     }
 

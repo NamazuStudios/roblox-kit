@@ -11,6 +11,7 @@ import dev.getelements.elements.sdk.model.exception.MultiMatchNotFoundException;
 import dev.getelements.elements.sdk.model.match.MultiMatch;
 import dev.getelements.elements.sdk.model.match.MultiMatchStatus;
 import dev.getelements.elements.sdk.model.profile.Profile;
+import dev.getelements.elements.sdk.model.user.User;
 import dev.getelements.elements.sdk.service.profile.ProfileService;
 import dev.getelements.elements.sdk.service.user.UserService;
 import dev.getelements.robloxkit.RobloxMatchmakingService;
@@ -22,6 +23,8 @@ import jakarta.inject.Provider;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
+
+import static dev.getelements.elements.sdk.model.user.User.Level.UNPRIVILEGED;
 
 public class StandardRobloxMatchmakingService implements RobloxMatchmakingService {
 
@@ -57,18 +60,7 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                     });
 
             multiMatch = multimatchDao.addProfile(multiMatch.getId(), profile);
-
-            final var isHost = RobloxMatchmakingService
-                    .findHostProfileId(multiMatch)
-                    .map(profileId -> profileId.equals(profile.getId()))
-                    .orElse(false);
-
-            final var response = new MatchStatusResponse();
-            response.setHost(isHost);
-            response.setMultiMatch(multiMatch);
-            response.setProfileId(profile.getId());
-
-            return response;
+            return toMatchStatusResponse(multiMatch, profile);
 
         });
     }
@@ -77,7 +69,7 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
     public MatchStatusResponse getMatchStatus(final String matchId) {
         return getTransactionProvider().get().performAndClose(txn -> {
 
-            final var profile = getProfile(txn, matchId);
+            final var profile = getProfileService().getCurrentProfile();
             final var multimatchDao = txn.getDao(MultiMatchDao.class);
 
             final var inMatch = multimatchDao.getProfiles(matchId)
@@ -89,15 +81,8 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
             }
 
             final var multiMatch = multimatchDao.getMultiMatch(matchId);
+            return toMatchStatusResponse(multiMatch, profile);
 
-            final var response = new MatchStatusResponse();
-            final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
-
-            response.setHost(isHost);
-            response.setMultiMatch(multiMatch);
-            response.setProfileId(profile.getId());
-
-            return response;
         });
     }
 
@@ -105,8 +90,9 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
     public MatchStatusResponse updateMatch(final String matchId, final UpdateMatchRequest updateMatchRequest) {
         return getTransactionProvider().get().performAndClose(txn -> {
 
-            final var profile = getProfile(txn, matchId);
+            final var profile = getProfileService().getCurrentProfile();
             final var multimatchDao = txn.getDao(MultiMatchDao.class);
+
 
             final var inMatch = multimatchDao.getProfiles(matchId)
                     .stream()
@@ -117,6 +103,10 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
             }
 
             var multiMatch = multimatchDao.getMultiMatch(matchId);
+
+            if (!RobloxMatchmakingService.isHost(multimatchDao.getMultiMatch(matchId), profile)) {
+                throw new MultiMatchNotFoundException();
+            }
 
             if (multiMatch.getMetadata() == null) {
                 multiMatch.setMetadata(new LinkedHashMap<>());
@@ -137,22 +127,15 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
 
             final var updateReservedServerId = RobloxMatchmakingService
                     .findReservedServerId(multiMatch)
-                    .map(reservedServerId -> reservedServerId.equals(updateMatchRequest.getReservedServerId()))
+                    .map(reservedServerId -> !reservedServerId.equals(updateMatchRequest.getReservedServerId()))
                     .orElse(true);
 
-            if (!updateReservedServerId) {
+            if (updateReservedServerId) {
                 RobloxMatchmakingService.setReservedServerId(multiMatch, updateMatchRequest.getReservedServerId());
                 multiMatch = multimatchDao.updateMultiMatch(multiMatch.getId(), multiMatch);
             }
 
-            final var response = new MatchStatusResponse();
-            final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
-
-            response.setHost(isHost);
-            response.setMultiMatch(multiMatch);
-            response.setProfileId(profile.getId());
-
-            return response;
+            return toMatchStatusResponse(multiMatch, profile);
 
         });
     }
@@ -161,14 +144,14 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
     public void deleteMatch(final String matchId) {
         getTransactionProvider().get().performAndCloseV(txn -> {
 
-            final var profile = getProfile(txn, matchId);
+            final var profile = getProfileService().getCurrentProfile();
             final var multimatchDao = txn.getDao(MultiMatchDao.class);
 
             if (!RobloxMatchmakingService.isHost(multimatchDao.getMultiMatch(matchId), profile)) {
                 throw new MultiMatchNotFoundException();
             }
 
-            multimatchDao.deleteMultiMatch(matchId);
+            multimatchDao.endMatch(matchId);
 
         });
     }
@@ -177,7 +160,7 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
     public MatchStatusResponse leaveMatch(final String matchId, final String profileId) {
         return getTransactionProvider().get().performAndClose(txn -> {
 
-            final var profile = getProfile(txn, profileId);
+            final var profile = getProfileService().getCurrentProfile();
             final var multimatchDao = txn.getDao(MultiMatchDao.class);
 
             final var inMatch = multimatchDao.getProfiles(matchId)
@@ -188,19 +171,36 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                 throw new MultiMatchNotFoundException();
             }
 
-            final var multiMatch = multimatchDao.getMultiMatch(matchId);
-            multimatchDao.removeProfile(matchId, profile);
+            var multiMatch = multimatchDao.removeProfile(matchId, profile);
 
-            final var response = new MatchStatusResponse();
-            final var isHost = RobloxMatchmakingService.isHost(multiMatch, profile);
+            if (multiMatch.getCount() == 0) {
+                multiMatch = multimatchDao.endMatch(matchId);
+            }
 
-            response.setHost(isHost);
-            response.setMultiMatch(multiMatch);
-            response.setProfileId(profile.getId());
-
-            return response;
+            return toMatchStatusResponse(multiMatch, profile);
 
         });
+    }
+
+    private MatchStatusResponse toMatchStatusResponse(final MultiMatch multiMatch,
+                                                      final Profile profile) {
+
+        final var response = new MatchStatusResponse();
+
+        final var isHost = RobloxMatchmakingService
+                .isHost(multiMatch, profile);
+
+        final var reservedServerId = RobloxMatchmakingService
+                .findReservedServerId(multiMatch)
+                .orElse(null);
+
+        response.setHost(isHost);
+        response.setReservedServerId(reservedServerId);
+        response.setMultiMatch(multiMatch);
+        response.setProfileId(profile.getId());
+
+        return response;
+
     }
 
     private Profile getProfile(final Transaction transaction,

@@ -2,6 +2,7 @@ package dev.getelements.robloxkit.element.service;
 
 import dev.getelements.elements.sdk.annotation.ElementDefaultAttribute;
 import dev.getelements.elements.sdk.dao.*;
+import dev.getelements.elements.sdk.model.exception.ForbiddenException;
 import dev.getelements.elements.sdk.model.exception.InternalException;
 import dev.getelements.elements.sdk.model.profile.Profile;
 import dev.getelements.elements.sdk.model.session.Session;
@@ -18,7 +19,6 @@ import jakarta.ws.rs.client.Client;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import java.util.Set;
 
 import static dev.getelements.elements.sdk.model.user.User.Level.USER;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -63,6 +63,10 @@ public class StandardRobloxAuthService implements RobloxAuthService {
 
         final var robloxProfile = getRobloxProfile(authRequest.getRobloxUserId());
 
+        if (robloxProfile.isBanned()) {
+            throw new ForbiddenException();
+        }
+
         return getTransactionProvider().get().performAndClose(txn -> {
 
             final var userDao = txn.getDao(UserDao.class);
@@ -80,8 +84,7 @@ public class StandardRobloxAuthService implements RobloxAuthService {
 
                         var u = new User();
                         u.setLevel(USER);
-                        u.setLinkedAccounts(Set.of(ROBLOX_AUTH_SCHEME));
-                        u = userDao.createUser(u);
+                        u = userDao.createUserStrict(u);
 
                         final var uid = new UserUid();
                         uid.setId(Long.toString(robloxProfile.getId()));

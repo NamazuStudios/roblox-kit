@@ -13,6 +13,8 @@ public class MatchStatusResponse {
 
     private boolean host;
 
+    private String reservedServerId;
+
     @NotNull
     private String profileId;
 
@@ -25,6 +27,14 @@ public class MatchStatusResponse {
 
     public void setHost(boolean host) {
         this.host = host;
+    }
+
+    public String getReservedServerId() {
+        return reservedServerId;
+    }
+
+    public void setReservedServerId(String reservedServerId) {
+        this.reservedServerId = reservedServerId;
     }
 
     public String getProfileId() {
