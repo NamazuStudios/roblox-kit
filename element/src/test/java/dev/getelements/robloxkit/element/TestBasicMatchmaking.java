@@ -120,7 +120,7 @@ public class TestBasicMatchmaking {
 
         // Ensures that one, and only one, match gets generated for the sake of this test.
         matchIds.add(findMatchResponse.getMultiMatch().getId());
-//        assertEquals(matchIds.size(), 1);
+        assertEquals(matchIds.size(), 1);
 
         if (findMatchResponse.isHost()) {
             doHost(client, findMatchResponse);
