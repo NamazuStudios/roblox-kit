@@ -7,7 +7,6 @@ import dev.getelements.robloxkit.model.MatchStatusResponse;
 import dev.getelements.robloxkit.model.UpdateMatchRequest;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.ext.ContextResolver;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static dev.getelements.robloxkit.element.TestMatchmakingClientContext.TEST_ROBLOX_USERS;
 import static dev.getelements.robloxkit.element.TestMatchmakingServer.APPLICATION;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class TestBasicMatchmaking {
@@ -83,14 +80,32 @@ public class TestBasicMatchmaking {
     }
 
     @DataProvider(parallel = true)
-    public Object[][] allClients() {
+    public Object[][] allPlayers() {
         return clients
                 .stream()
                 .map(c -> new Object[]{c})
                 .toArray(Object[][]::new);
     }
 
-    @Test(dataProvider = "allClients")
+    @DataProvider(parallel = true)
+    public Object[][] allHosts() {
+        return clients
+                .stream()
+                .limit(1)
+                .map(c -> new Object[]{c})
+                .toArray(Object[][]::new);
+    }
+
+    @DataProvider(parallel = true)
+    public Object[][] allClients() {
+        return clients
+                .stream()
+                .skip(1)
+                .map(c -> new Object[]{c})
+                .toArray(Object[][]::new);
+    }
+
+    @Test(dataProvider = "allPlayers", threadPoolSize = 4)
     public void testSignIn(final TestMatchmakingClientContext context) {
 
         final var client = context.client();
@@ -106,73 +121,101 @@ public class TestBasicMatchmaking {
 
     }
 
-    @Test(dataProvider = "allClients", dependsOnMethods = "testSignIn")
-    public void testFindMatch(final TestMatchmakingClientContext context) throws Exception{
+    @Test(dataProvider = "allHosts", dependsOnMethods = "testSignIn")
+    public void testFindMatchHost(final TestMatchmakingClientContext context) throws Exception{
 
         final var client = context.client();
         assertTrue(client.isLoggedOn());
 
-        final var random = ThreadLocalRandom.current();
-        Thread.sleep(random.nextInt(1000));
-
         final var findMatchResponse = client.findMatch(configuration.getName());
         assertNotNull(findMatchResponse);
+        assertTrue(findMatchResponse.isHost());
+        assertNull(findMatchResponse.getReservedServerId());
+        assertTrue(matchIds.add(findMatchResponse.getMultiMatch().getId()));
 
-        // Ensures that one, and only one, match gets generated for the sake of this test.
-        matchIds.add(findMatchResponse.getMultiMatch().getId());
-        assertEquals(matchIds.size(), 1);
+    }
 
-        if (findMatchResponse.isHost()) {
-            doHost(client, findMatchResponse);
+    @Test(dataProvider = "allClients", threadPoolSize = 3, dependsOnMethods = {"testSignIn", "testFindMatchHost"})
+    public void testFindMatchClient(final TestMatchmakingClientContext context) throws Exception{
+
+        final var client = context.client();
+        assertTrue(client.isLoggedOn());
+
+        var status = client.findMatch(configuration.getName());
+        assertNotNull(status);
+        assertFalse(status.isHost());
+
+        // Ensures that one, and only one, match gets generated for the sake of this test. The host has to have
+        // created ths match in the first find operation so this should never change the collection of hosts ids.
+        assertFalse(matchIds.add(status.getMultiMatch().getId()));
+
+    }
+
+    @Test(dataProvider = "allPlayers",
+          threadPoolSize = 4,
+          dependsOnMethods = {"testSignIn", "testFindMatchHost", "testFindMatchClient"}
+    )
+    public void testStartGame(final TestMatchmakingClientContext context) throws Exception {
+
+        final var client = context.client();
+        assertTrue(client.isLoggedOn());
+        assertTrue(client.isInMatch());
+
+        final var status = client.getMatchStatusResponse();
+        assertNotNull(status);
+
+        if (status.isHost()) {
+            hostDelayAndStartGame(client);
         } else {
-            doClient(client, findMatchResponse);
+            clientPollAndWaitForGameStart(client);
         }
 
     }
 
-    private void doHost(final TestMatchmakingClient client, final MatchStatusResponse status) throws Exception {
+    private void hostDelayAndStartGame(final TestMatchmakingClient client) throws Exception {
 
-        logger.info("Delaying to simulate server start.");
+        logger.info("Delaying to simulate server start delay.");
         Thread.sleep(SERVER_CREATE_DELAY);
 
-        logger.info("Starting server.");
+        logger.info("Staring simulated server.");
+
         final var request = new UpdateMatchRequest();
         request.setMetadata(new HashMap<>());
         request.setReservedServerId(mockReservedServerId);
 
-        final var response = client.updateMatch(status.getMultiMatch().getId(), request);
+        final var response = client.updateCurrentMatch(request);
         assertNotNull(response);
-        assertEquals(status.getMultiMatch().getId(), response.getMultiMatch().getId());
         assertEquals(response.getReservedServerId(), mockReservedServerId);
 
     }
 
-    private void doClient(final TestMatchmakingClient client, final MatchStatusResponse status) throws Exception {
+    private void clientPollAndWaitForGameStart(final TestMatchmakingClient client) throws Exception {
 
         final var timeout = System.currentTimeMillis() + (SERVER_CREATE_DELAY * 2);
 
-        var latest = status;
+        MatchStatusResponse status;
 
         do {
             logger.info("Waiting for reserved server id ...");
             Thread.sleep(SERVER_CREATE_POLL_INTERVAL);
-            latest = client.pollMatch(status.getMultiMatch().getId());
-            assertNotNull(latest);
+            status = client.pollMatch();
+            assertNotNull(status);
+            assertFalse(status.isHost());
             assertTrue(timeout > System.currentTimeMillis());
-        } while (latest.getReservedServerId() == null);
+        } while (status.getReservedServerId() == null);
 
-        assertEquals(latest.getReservedServerId(), mockReservedServerId);
+        assertEquals(status.getReservedServerId(), mockReservedServerId);
 
     }
 
-    @Test(dataProvider = "allClients", dependsOnMethods = "testFindMatch")
-    public void testLeaveMatch(final TestMatchmakingClientContext context) throws Exception{
+    @Test(dataProvider = "allPlayers",
+          threadPoolSize = 4,
+          dependsOnMethods = {"testStartGame"})
+    public void testLeaveMatch(final TestMatchmakingClientContext context) throws Exception {
 
         final var client = context.client();
         assertTrue(client.isLoggedOn());
-
-        final var matchId = matchIds.iterator().next();
-        client.leaveMatch(matchId);
+        client.leaveMatch();
 
     }
 

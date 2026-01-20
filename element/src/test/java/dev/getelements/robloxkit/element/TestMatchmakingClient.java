@@ -6,12 +6,13 @@ import jakarta.ws.rs.client.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 import static dev.getelements.robloxkit.element.TestMatchmakingServer.*;
 import static dev.getelements.robloxkit.element.rest.SimpleRobloxSecurityFilter.ROBLOX_SECURITY_HEADER;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
+/**
+ * Test client for matchmaking.
+ */
 public class TestMatchmakingClient {
 
     private static final Logger logger = LoggerFactory.getLogger(TestMatchmakingClient.class);
@@ -25,6 +26,8 @@ public class TestMatchmakingClient {
     private final String robloxSecret;
 
     private UserAuthResponse userAuthResponse;
+
+    private MatchStatusResponse matchStatusResponse;
 
     public TestMatchmakingClient(final Client client) {
         this(client, URL, APPLICATION, TEST_ROBLOX_SECRET);
@@ -48,6 +51,24 @@ public class TestMatchmakingClient {
      */
     public boolean isLoggedOn() {
         return userAuthResponse != null;
+    }
+
+    /**
+     * True if the user is in a match.
+     *
+     * @return the in-match status
+     */
+    public boolean isInMatch() {
+        return matchStatusResponse != null;
+    }
+
+    /**
+     * Gets the last recorded {@link MatchStatusResponse}.
+     *
+     * @return the match status
+     */
+    public MatchStatusResponse getMatchStatusResponse() {
+        return matchStatusResponse;
     }
 
     /**
@@ -78,19 +99,16 @@ public class TestMatchmakingClient {
                 .post(entity);
 
         if (httpResponse.getStatus() == 200) {
-            userAuthResponse = httpResponse.readEntity(UserAuthResponse.class);
+            return userAuthResponse = httpResponse.readEntity(UserAuthResponse.class);
         } else {
-
-            userAuthResponse = null;
 
             logger.error("Error response logging in {} - {}",
                     httpResponse.getStatus(),
                     httpResponse.readEntity(String.class)
             );
 
+            return null;
         }
-
-        return userAuthResponse;
 
     }
 
@@ -103,6 +121,10 @@ public class TestMatchmakingClient {
 
         if (!isLoggedOn()) {
             throw new IllegalStateException("User must be logged on to find a match.");
+        }
+
+        if (isInMatch()) {
+            throw new IllegalStateException("User is already in a match.");
         }
 
         final var request = new FindMatchRequest();
@@ -119,14 +141,32 @@ public class TestMatchmakingClient {
                 .post(entity);
 
         if (response.getStatus() == 200) {
-            return response.readEntity(MatchStatusResponse.class);
+            return matchStatusResponse = response.readEntity(MatchStatusResponse.class);
         } else {
+
             logger.error("Error response finding match {} - {}",
                     response.getStatus(),
                     response.readEntity(String.class)
             );
+
             return null;
+
         }
+
+    }
+
+    /**
+     * Polls the current match.
+     *
+     * @return the match status
+     */
+    public MatchStatusResponse pollMatch() {
+
+        if (!isInMatch()) {
+            throw new IllegalStateException("User must be logged on to find a match.");
+        }
+
+        return pollMatch(matchStatusResponse.getMultiMatch().getId());
 
     }
 
@@ -140,6 +180,11 @@ public class TestMatchmakingClient {
 
         if (!isLoggedOn()) {
             throw new IllegalStateException("User must be logged on to poll a match.");
+        } else if (isInMatch() && !matchStatusResponse.getMultiMatch().getId().equals(matchId)) {
+            throw new IllegalStateException("Client is already in match %s. Cannot poll a match %s.".formatted(
+                    matchStatusResponse.getMultiMatch().getId(),
+                    matchId)
+            );
         }
 
         final var authorization = "Bearer %s".formatted(userAuthResponse.getSession().getSessionSecret());
@@ -152,7 +197,7 @@ public class TestMatchmakingClient {
                 .get();
 
         if (response.getStatus() == 200) {
-            return response.readEntity(MatchStatusResponse.class);
+            return matchStatusResponse = response.readEntity(MatchStatusResponse.class);
         } else {
             logger.error("Error response polling match {} - {}",
                     response.getStatus(),
@@ -160,6 +205,22 @@ public class TestMatchmakingClient {
             );
             return null;
         }
+
+    }
+
+    /**
+     * Updates the current match.
+     *
+     * @param updateMatchRequest the update request
+     * @return the match status
+     */
+    public MatchStatusResponse updateCurrentMatch(final UpdateMatchRequest updateMatchRequest) {
+
+        if (!isInMatch()) {
+            throw new IllegalStateException("User must be logged on to find a match.");
+        }
+
+        return updateMatch(matchStatusResponse.getMultiMatch().getId(), updateMatchRequest);
 
     }
 
@@ -173,7 +234,12 @@ public class TestMatchmakingClient {
     public MatchStatusResponse updateMatch(final String matchId, final UpdateMatchRequest update) {
 
         if (!isLoggedOn()) {
-            throw new IllegalStateException("User must be logged on to update a match.");
+            throw new IllegalStateException("User must be logged on to poll a match.");
+        } else if (isInMatch() && !matchStatusResponse.getMultiMatch().getId().equals(matchId)) {
+            throw new IllegalStateException("Client is already in match %s. Cannot poll a match %s.".formatted(
+                    matchStatusResponse.getMultiMatch().getId(),
+                    matchId)
+            );
         }
 
         final var entity = Entity.json(update);
@@ -187,14 +253,32 @@ public class TestMatchmakingClient {
                 .put(entity);
 
         if (response.getStatus() == 200) {
-            return response.readEntity(MatchStatusResponse.class);
+            return matchStatusResponse = response.readEntity(MatchStatusResponse.class);
         } else {
+
             logger.error("Error response updating match {} - {}",
                     response.getStatus(),
                     response.readEntity(String.class)
             );
+
             return null;
+
         }
+
+    }
+
+    /**
+     * Leaves the current match.
+     *
+     * @return the match status
+     */
+    public MatchStatusResponse leaveMatch() {
+
+        if (!isInMatch()) {
+            throw new IllegalStateException("User must be logged on to find a match.");
+        }
+
+        return leaveMatch(matchStatusResponse.getMultiMatch().getId());
 
     }
 
@@ -221,13 +305,17 @@ public class TestMatchmakingClient {
                 .delete();
 
         if (response.getStatus() == 200) {
+            matchStatusResponse = null;
             return response.readEntity(MatchStatusResponse.class);
         } else {
+
             logger.error("Error response leaving match {} - {}",
                     response.getStatus(),
                     response.readEntity(String.class)
             );
+
             return null;
+
         }
 
     }
