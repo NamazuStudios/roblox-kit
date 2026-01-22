@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static jakarta.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE;
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
@@ -23,6 +24,8 @@ public class SimpleRobloxSecurityFilter implements ContainerRequestFilter {
     public static final String ROBLOX_SECURITY_HEADER = "RobloxKit-Secret";
 
     public static final String ROBLOX_SECRET = "dev.getelements.robloxkit.secret";
+
+    public static final Set<String> PERMITTED_PATHS = Set.of("", "openapi.json");
 
     private final LazyValue<String> robloxSecret = new ThreadSafeLazyValue<>(() -> {
 
@@ -43,6 +46,10 @@ public class SimpleRobloxSecurityFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
+
+        if (PERMITTED_PATHS.contains(requestContext.getUriInfo().getPath())) {
+            return;
+        }
 
         final var header = Optional.ofNullable(requestContext
                         .getHeaders()
