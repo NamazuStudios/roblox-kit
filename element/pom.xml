@@ -15,13 +15,6 @@
 
     <dependencies>
         <!-- Project Dependencies -->
-
-        <!--
-        With Elements 3.3 and higher, the Element must provide the SPI in the distribution. Currently, the only SPI we
-        provide is the Guice based SPI and it contains some specifics which wire up the services within the Element
-        itself.
-        -->
-
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-spi</artifactId>
@@ -34,34 +27,31 @@
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-logback</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${guice.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.99soft.guice</groupId>
+            <artifactId>rocoto</artifactId>
+        </dependency>
+
+
+        <!-- Provided Dependencies -->
+
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-local</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-local-maven</artifactId>
-        </dependency>
-
-        <!-- Provided Dependencies -->
-
-        <dependency>
-            <groupId>dev.getelements.robloxkit</groupId>
-            <artifactId>api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.getelements.elements</groupId>
-            <artifactId>sdk-local</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -71,6 +61,7 @@
             <version>${jakarta.websocket.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>dev.getelements.robloxkit</groupId>
             <artifactId>api</artifactId>
@@ -82,6 +73,7 @@
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-jakarta</artifactId>
             <version>${swagger.version}</version>
+            <scope>provided</scope>
 
             <!-- Avoid conflicts with parent dependencies -->
             <exclusions>
@@ -118,6 +110,7 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-mongo-test</artifactId>
@@ -157,6 +150,34 @@
                             <excludeGroupIds>ch.qos.logback</excludeGroupIds>
                             <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
                             <outputDirectory>${project.build.directory}/element-libs</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-element-dependencies</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <prependGroupId>true</prependGroupId>
+                            <excludeScope>provided</excludeScope>
+                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>
+                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
+                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-element-api</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <prependGroupId>true</prependGroupId>
+                            <includeScope>provided</includeScope>
+                            <includeGroupIds>${project.groupId}</includeGroupIds>
+                            <includeArtifactIds>api</includeArtifactIds>
+                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -212,50 +233,50 @@
             </plugin>
 
             <!-- Copies all dependencies to the library path -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-element-dependencies</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <excludeScope>provided</excludeScope>
-                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>
-                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
-                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                <version>3.6.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy-element-dependencies</id>-->
+<!--                        <phase>process-classes</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <prependGroupId>true</prependGroupId>-->
+<!--                            <excludeScope>provided</excludeScope>-->
+<!--                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>-->
+<!--                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>-->
+<!--                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <!-- Copies the API from the Element's SDK package -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-element-api</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <includeScope>provided</includeScope>
-                            <includeGroupIds>${project.groupId}</includeGroupIds>
-                            <includeArtifactIds>api</includeArtifactIds>
-                            <outputDirectory>${element.distribution.dir}/api</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--                <version>3.6.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy-element-api</id>-->
+<!--                        <phase>process-classes</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <prependGroupId>true</prependGroupId>-->
+<!--                            <includeScope>provided</includeScope>-->
+<!--                            <includeGroupIds>${project.groupId}</includeGroupIds>-->
+<!--                            <includeArtifactIds>api</includeArtifactIds>-->
+<!--                            <outputDirectory>${element.distribution.dir}/api</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -293,7 +314,7 @@
         <jakarta.websocket.version>2.1.0</jakarta.websocket.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <element.target.dir>${project.build.directory}/element</element.target.dir>
-        <element.distribution.dir>${element.target.dir}/${groupId}.${artifactId}</element.distribution.dir>
+        <element.distribution.dir>${element.target.dir}/${project.groupId}.${project.artifactId}</element.distribution.dir>
         <element.distribution.zip>${element.target.dir}/${project.artifactId}-${project.version}.zip</element.distribution.zip>
     </properties>
 

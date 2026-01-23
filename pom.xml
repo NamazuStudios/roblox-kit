@@ -20,7 +20,11 @@
         <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <elements.version>3.6.21</elements.version>
+        <elements.version>3.6.24</elements.version>
+        <jackson.version>2.18.2</jackson.version>
+        <rocoto.version>6.2</rocoto.version>
+        <logback.version>1.2.3</logback.version>
+        <guice.version>7.0.0</guice.version>
         <jakarta.validation.version>3.1.0</jakarta.validation.version>
     </properties>
 
@@ -64,7 +68,11 @@
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
-                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.validation</groupId>
@@ -94,6 +102,21 @@
                 <groupId>dev.getelements.elements</groupId>
                 <artifactId>sdk-logback</artifactId>
                 <version>${elements.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.99soft.guice</groupId>
+                <artifactId>rocoto</artifactId>
+                <version>${rocoto.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->
