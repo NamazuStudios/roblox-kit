@@ -131,8 +131,15 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                     .orElse(true);
 
             if (updateReservedServerId) {
+
                 RobloxMatchmakingService.setReservedServerId(multiMatch, updateMatchRequest.getReservedServerId());
+
+                if (updateMatchRequest.getReservedServerId() != null) {
+                    multiMatch.setStatus(MultiMatchStatus.CLOSED);
+                }
+
                 multiMatch = multimatchDao.updateMultiMatch(multiMatch.getId(), multiMatch);
+
             }
 
             return toMatchStatusResponse(multiMatch, profile);
