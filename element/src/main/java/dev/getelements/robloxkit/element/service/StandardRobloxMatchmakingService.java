@@ -125,22 +125,13 @@ public class StandardRobloxMatchmakingService implements RobloxMatchmakingServic
                             .forEach(e -> multiMatchMetadata.put(e.getKey(), e.getValue()))
                     );
 
-            final var updateReservedServerId = RobloxMatchmakingService
-                    .findReservedServerId(multiMatch)
-                    .map(reservedServerId -> !reservedServerId.equals(updateMatchRequest.getReservedServerId()))
-                    .orElse(true);
+            RobloxMatchmakingService.setReservedServerId(multiMatch, updateMatchRequest.getReservedServerId());
 
-            if (updateReservedServerId) {
-
-                RobloxMatchmakingService.setReservedServerId(multiMatch, updateMatchRequest.getReservedServerId());
-
-                if (updateMatchRequest.getReservedServerId() != null) {
-                    multiMatch.setStatus(MultiMatchStatus.CLOSED);
-                }
-
-                multiMatch = multimatchDao.updateMultiMatch(multiMatch.getId(), multiMatch);
-
+            if (updateMatchRequest.getReservedServerId() != null) {
+                multiMatch.setStatus(MultiMatchStatus.CLOSED);
             }
+
+            multiMatch = multimatchDao.updateMultiMatch(multiMatch.getId(), multiMatch);
 
             return toMatchStatusResponse(multiMatch, profile);
 
