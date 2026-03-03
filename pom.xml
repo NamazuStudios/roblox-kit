@@ -12,6 +12,7 @@
     <modules>
         <module>api</module>
         <module>element</module>
+        <module>debug</module>
     </modules>
 
     <properties>
@@ -20,16 +21,42 @@
         <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <elements.version>3.6.24</elements.version>
+        <elements.version>3.7.12</elements.version>
         <jackson.version>2.18.2</jackson.version>
         <rocoto.version>6.2</rocoto.version>
         <logback.version>1.2.3</logback.version>
         <guice.version>7.0.0</guice.version>
         <jakarta.validation.version>3.1.0</jakarta.validation.version>
+        <rs.api>4.0.0</rs.api>
+        <jakarta.websocket.version>2.1.0</jakarta.websocket.version>
+        <crossfire.version>1.0.4</crossfire.version>
+        <servlet.api>6.1.0</servlet.api>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+        <api.classifier>${project.groupId}.api</api.classifier>
     </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>dev.getelements.elements</groupId>
+                <artifactId>sdk-bom</artifactId>
+                <version>${elements.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <!-- Inter-project dependencies -->
             <dependency>
@@ -39,31 +66,20 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- Elements SDK Dependencies Provided by the Core Runtime -->
             <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk</artifactId>
-                <version>${elements.version}</version>
+                <groupId>dev.getelements.robloxkit</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
+                <classifier>${api.classifier}</classifier>
                 <scope>provided</scope>
             </dependency>
+
             <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-model</artifactId>
-                <version>${elements.version}</version>
-                <scope>provided</scope>
+                <groupId>dev.getelements.robloxkit</groupId>
+                <artifactId>element</artifactId>
+                <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-local</artifactId>
-                <version>${elements.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-local-maven</artifactId>
-                <version>${elements.version}</version>
-                <scope>provided</scope>
-            </dependency>
+
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
@@ -79,29 +95,6 @@
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>${jakarta.validation.version}</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <!-- Element Dependencies Provided by the Element -->
-
-            <dependency>
-                <groupId>dev.getelements.robloxkit</groupId>
-                <artifactId>element</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-spi</artifactId>
-                <version>${elements.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-spi-guice</artifactId>
-                <version>${elements.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-logback</artifactId>
-                <version>${elements.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -124,12 +117,6 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>dev.getelements.elements</groupId>
-                <artifactId>sdk-mongo-test</artifactId>
-                <version>${elements.version}</version>
                 <scope>test</scope>
             </dependency>
 

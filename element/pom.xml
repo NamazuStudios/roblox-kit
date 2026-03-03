@@ -13,8 +13,22 @@
     <artifactId>element</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <elm.builtin.spis>DEFAULT</elm.builtin.spis>
+        <elm.staging.dir>${project.build.directory}/${project.groupId}.${project.artifactId}-${project.version}</elm.staging.dir>
+        <elm.element.dir>${elm.staging.dir}/${project.groupId}.${project.artifactId}</elm.element.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
-        <!-- Project Dependencies -->
+        <!-- The Element's API classifier artifact, copied into the api/ directory of the .elm archive. -->
+        <dependency>
+            <groupId>dev.getelements.robloxkit</groupId>
+            <artifactId>api</artifactId>
+            <classifier>${api.classifier}</classifier>
+        </dependency>
+
+        <!-- SPI Implementations -->
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-spi</artifactId>
@@ -40,31 +54,20 @@
             <artifactId>rocoto</artifactId>
         </dependency>
 
-
         <!-- Provided Dependencies -->
-
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-local</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-local-maven</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>jakarta.websocket</groupId>
             <artifactId>jakarta.websocket-api</artifactId>
-            <version>${jakarta.websocket.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.getelements.robloxkit</groupId>
-            <artifactId>api</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -72,9 +75,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-jakarta</artifactId>
-            <version>${swagger.version}</version>
             <scope>provided</scope>
-
             <!-- Avoid conflicts with parent dependencies -->
             <exclusions>
                 <exclusion>
@@ -92,7 +93,6 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
-            <version>${swagger.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -100,7 +100,6 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-integration-jakarta</artifactId>
-            <version>${swagger.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -110,7 +109,6 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-mongo-test</artifactId>
@@ -122,200 +120,154 @@
     <build>
         <plugins>
 
-            <!--
-            The new SDK loader will automatically copy the dependencies of the Element to an expected path on disk
-            where it will be loaded in an isolated classpath similar to how the Element is loaded in the production
-            environment.
-
-            When deploying the Element, the dependencies will are all copied neatly to the `element-libs` directory
-            where they can be deployed alongside the Element JAR file or compiled classes.
-
-            We will likely remove this approach in the future as it has the potential to create classpath pollution.
-            In order to do so, we need to add more granularity to the SDK loader to allow for more flexible loading.
-             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.6.0</version>
                 <executions>
+                    <!--
+                        Copies dependent artifacts carrying the api classifier that belong to this
+                        project's groupId into the "api" directory of the staging area. These are the API jars
+                        exported to other Elements.
+                    -->
                     <execution>
-                        <id>copy-element-deps</id>
-                        <phase>generate-resources</phase>
+                        <id>elm-copy-api-deps</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <excludeScope>provided</excludeScope>
-                            <excludeGroupIds>ch.qos.logback</excludeGroupIds>
-                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
-                            <outputDirectory>${project.build.directory}/element-libs</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-element-dependencies</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <excludeScope>provided</excludeScope>
-                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>
-                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>
-                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-element-api</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <prependGroupId>true</prependGroupId>
-                            <includeScope>provided</includeScope>
+                            <outputDirectory>${elm.element.dir}/api</outputDirectory>
                             <includeGroupIds>${project.groupId}</includeGroupIds>
-                            <includeArtifactIds>api</includeArtifactIds>
-                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>
+                            <includeClassifiers>${api.classifier}</includeClassifiers>
+                            <prependGroupId>true</prependGroupId>
+                        </configuration>
+                    </execution>
+                    <!--
+                        Copies all non-provided dependencies into the "lib" directory of the staging area.
+                        These are the runtime libraries bundled with the Element.
+                    -->
+                    <execution>
+                        <id>elm-copy-lib-deps</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${elm.element.dir}/lib</outputDirectory>
+                            <excludeScope>provided</excludeScope>
+                            <prependGroupId>true</prependGroupId>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!--
-            This makes a complete ready-to-deploy copy of your Element's compiled code. In future releases, we will
-            make this process easier and more strealined and deprecate the approach in the above steps.
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
+                    <!--
+                        Stages compiled classes and src/main/resources contents into the "classpath" directory.
+                        Runs in prepare-package so the staging area is complete before the archive is created.
+                    -->
                     <execution>
-                        <id>copy-element-build</id>
-                        <phase>process-classes</phase>
+                        <id>elm-stage-classpath</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
-                                <copy todir="${element.distribution.dir}/classpath">
-                                    <fileset dir="${project.build.directory}/classes" />
+                                <copy todir="${elm.element.dir}/classpath" failonerror="false">
+                                    <fileset dir="${project.build.outputDirectory}" erroronmissingdir="false" includes="**/*"/>
                                 </copy>
+                                <copy todir="${elm.element.dir}/classpath" failonerror="false">
+                                    <fileset dir="${basedir}/src/main/resources" erroronmissingdir="false" includes="**/*"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <!--
+                        Writes the element manifest properties file into the root of the element directory.
+                        The loader reads this file to obtain version metadata and required builtin SPIs.
+                    -->
+                    <execution>
+                        <id>elm-write-manifest</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${elm.element.dir}"/>
+                                <exec executable="git" outputproperty="git.revision"
+                                      failifexecutionfails="false" errorproperty="git.error">
+                                    <arg value="rev-parse"/>
+                                    <arg value="HEAD"/>
+                                </exec>
+                                <property name="git.revision" value="unknown"/>
+                                <echo file="${elm.element.dir}/dev.getelements.element.manifest.properties" append="false">Element-Version=${project.version}
+Element-Build-Time=${maven.build.timestamp}
+Element-Revision=${git.revision}
+Element-Builtin-Spis=${elm.builtin.spis}
+                                </echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <!--
+                        Creates the .elm archive from the fully staged directory. Ensures all three top-level
+                        directories exist so the archive structure is always consistent.
+                    -->
+                    <execution>
+                        <id>elm-create-archive</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${elm.element.dir}/api"/>
+                                <mkdir dir="${elm.element.dir}/lib"/>
+                                <mkdir dir="${elm.element.dir}/classpath"/>
+                                <zip destfile="${elm.staging.dir}.elm" basedir="${elm.staging.dir}"/>
                             </target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Ensures that anything in src/main/resources ends up in the Elements classpath -->
+            <!--
+                Attaches the .elm archive to the build so it is installed and deployed alongside
+                the standard jar artifact. After mvn install the artifact is available in the
+                local Maven repository as:
+                    dev.getelements.robloxkit:element:1.0-SNAPSHOT:elm
+                and can be published to a remote repository with mvn deploy.
+            -->
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-element-resources</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${element.distribution.dir}/classpath</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Copies all dependencies to the library path -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-dependency-plugin</artifactId>-->
-<!--                <version>3.6.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>copy-element-dependencies</id>-->
-<!--                        <phase>process-classes</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-dependencies</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <prependGroupId>true</prependGroupId>-->
-<!--                            <excludeScope>provided</excludeScope>-->
-<!--                            <excludeGroupIds>ch.qos.logback,dev.getelements.elements.crossfire</excludeGroupIds>-->
-<!--                            <excludeArtifactIds>sdk-local,sdk-local-maven,sdk-logback</excludeArtifactIds>-->
-<!--                            <outputDirectory>${element.distribution.dir}/lib</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-            <!-- Copies the API from the Element's SDK package -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-dependency-plugin</artifactId>-->
-<!--                <version>3.6.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>copy-element-api</id>-->
-<!--                        <phase>process-classes</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-dependencies</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <prependGroupId>true</prependGroupId>-->
-<!--                            <includeScope>provided</includeScope>-->
-<!--                            <includeGroupIds>${project.groupId}</includeGroupIds>-->
-<!--                            <includeArtifactIds>api</includeArtifactIds>-->
-<!--                            <outputDirectory>${element.distribution.dir}/api</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.6.0</version>
                 <executions>
                     <execution>
-                        <id>zip-target-dir</id>
+                        <id>attach-elm</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>attach-artifact</goal>
                         </goals>
                         <configuration>
-                            <attach>false</attach>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <descriptors>
-                                <descriptor>src/assembly/zip.xml</descriptor>
-                            </descriptors>
+                            <artifacts>
+                                <artifact>
+                                    <file>${elm.staging.dir}.elm</file>
+                                    <type>elm</type>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
-
     </build>
-
-    <properties>
-        <swagger.version>2.2.22</swagger.version>
-        <rs.api>4.0.0</rs.api>
-        <guice.version>7.0.0</guice.version>
-        <crossfire.version>1.0.4</crossfire.version>
-        <servlet.api>6.1.0</servlet.api>
-        <logback.version>1.2.3</logback.version>
-        <jakarta.websocket.version>2.1.0</jakarta.websocket.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <element.target.dir>${project.build.directory}/element</element.target.dir>
-        <element.distribution.dir>${element.target.dir}/${project.groupId}.${project.artifactId}</element.distribution.dir>
-        <element.distribution.zip>${element.target.dir}/${project.artifactId}-${project.version}.zip</element.distribution.zip>
-    </properties>
 
 </project>
