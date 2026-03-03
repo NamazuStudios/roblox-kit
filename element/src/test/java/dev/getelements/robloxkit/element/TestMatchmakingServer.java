@@ -24,8 +24,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static dev.getelements.elements.sdk.local.maven.MavenElementsLocalBuilder.ELEMENT_CLASSPATH;
-import static dev.getelements.elements.sdk.mongo.MongoConfigurationService.MONGO_CLIENT_URI;
+ import static dev.getelements.elements.sdk.mongo.MongoConfigurationService.MONGO_CLIENT_URI;
 import static dev.getelements.robloxkit.element.rest.SimpleRobloxSecurityFilter.ROBLOX_SECRET;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -44,6 +43,10 @@ public class TestMatchmakingServer {
     private static final int STARTUP_TIMEOUT_SECONDS = 180;
 
     private static final int TEST_MONGO_PORT = 45005;
+
+    private static final String PROJECT_VERSION = System.getProperty("project.version");
+
+    private static final String PROJECT_GROUP_ID = System.getProperty("project.groupId");
 
     private static final ShutdownHooks shutdownHooks = new ShutdownHooks(TestMatchmakingServer.class);
 
@@ -69,16 +72,24 @@ public class TestMatchmakingServer {
         final var systemProperties = System.getProperties();
         final var workingDirectory = Path.of(".");
 
-        logger.info("Element Classpath: {}", ELEMENT_CLASSPATH);
-        logger.info("Working Directory: {}", workingDirectory.toAbsolutePath().normalize().toString());
+        logger.info("Working Directory: {}", workingDirectory.toAbsolutePath().normalize());
 
         systemProperties.put(MONGO_CLIENT_URI, format("mongodb://127.0.0.1:%d", TEST_MONGO_PORT));
 
         final var elementProperties = new Properties();
         elementProperties.put(ROBLOX_SECRET, TEST_ROBLOX_SECRET);
 
+        final var elmArtifact = "%s:element:elm:%s".formatted(PROJECT_GROUP_ID, PROJECT_VERSION);
+
         elementsLocal = ElementsLocalBuilder.getDefault()
                 .withProperties(systemProperties)
+                .withSourceRoot()
+                .withDeployment(builder -> builder
+                        .elementPackage()
+                        .elmArtifact(elmArtifact)
+                        .endElementPackage()
+                        .build()
+                )
                 .withElementNamed(
                         APPLICATION,
                         "dev.getelements.robloxkit.element",

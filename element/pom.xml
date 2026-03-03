@@ -93,14 +93,12 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Programmatic configuration and contexts -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-integration-jakarta</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Testing Dependencies -->
@@ -207,7 +205,8 @@
                                     <arg value="HEAD"/>
                                 </exec>
                                 <property name="git.revision" value="unknown"/>
-                                <echo file="${elm.element.dir}/dev.getelements.element.manifest.properties" append="false">Element-Version=${project.version}
+                                <echo file="${elm.element.dir}/dev.getelements.element.manifest.properties" append="false">
+Element-Version=${project.version}
 Element-Build-Time=${maven.build.timestamp}
 Element-Revision=${git.revision}
 Element-Builtin-Spis=${elm.builtin.spis}
