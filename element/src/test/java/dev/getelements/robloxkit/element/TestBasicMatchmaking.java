@@ -15,6 +15,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -50,8 +52,6 @@ public class TestBasicMatchmaking {
 
     @BeforeClass
     public void setupClients() {
-
-        final ObjectMapper mapper = new ObjectMapper();
 
         client = ClientBuilder.newBuilder()
                 .register(new JacksonFeature())
@@ -106,7 +106,7 @@ public class TestBasicMatchmaking {
     }
 
     @Test(dataProvider = "allPlayers", threadPoolSize = 4)
-    public void testSignIn(final TestMatchmakingClientContext context) {
+    public void testSignIn(final TestMatchmakingClientContext context) throws Exception {
 
         final var client = context.client();
 

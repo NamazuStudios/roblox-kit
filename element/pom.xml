@@ -22,6 +22,7 @@
 
     <dependencies>
         <!-- The Element's API classifier artifact, copied into the api/ directory of the .elm archive. -->
+
         <dependency>
             <groupId>dev.getelements.robloxkit</groupId>
             <artifactId>api</artifactId>
@@ -29,87 +30,93 @@
         </dependency>
 
         <!-- SPI Implementations -->
+
+        <!-- The SDK Artifact. This is the core SDK for Namazu Elements -->
         <dependency>
             <groupId>dev.getelements.elements</groupId>
-            <artifactId>sdk-spi</artifactId>
+            <artifactId>sdk</artifactId>
         </dependency>
+        <!-- The Model Artifact. This contains all models used by the services and database objects. -->
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-model</artifactId>
+        </dependency>
+        <!-- The Service artifact. Contains all business logic of Namazu Elements.-->
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-service</artifactId>
+        </dependency>
+        <!-- The Guice loader SPI -->
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-spi-guice</artifactId>
         </dependency>
+        <!-- The Jakarta RS Support-->
         <dependency>
             <groupId>dev.getelements.elements</groupId>
-            <artifactId>sdk-logback</artifactId>
+            <artifactId>sdk-jakarta-rs</artifactId>
         </dependency>
+        <!-- Guice. The version recommended and tested with Namazu Elements -->
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
+        <!-- Jakarta RS. REST API Support. Only include if you want RESTFul APIs in your Element -->
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.99soft.guice</groupId>
-            <artifactId>rocoto</artifactId>
-        </dependency>
-
-        <!-- Provided Dependencies -->
-        <dependency>
-            <groupId>dev.getelements.elements</groupId>
-            <artifactId>sdk-local</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>dev.getelements.elements</groupId>
-            <artifactId>sdk-local-maven</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        <!-- Jakarta WS. WebSocket Support. Only include if you want WebSockets in your Element -->
         <dependency>
             <groupId>jakarta.websocket</groupId>
             <artifactId>jakarta.websocket-api</artifactId>
-            <scope>provided</scope>
         </dependency>
-
-        <!-- Swagger Core for Jakarta namespace -->
+        <!-- Swagger Annotations for API Documentation. -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-jaxrs2-jakarta</artifactId>
-            <scope>provided</scope>
-            <!-- Avoid conflicts with parent dependencies -->
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
-
-        <!-- Annotations like @Operation, @Schema. Provided by Elements Core -->
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations-jakarta</artifactId>
-        </dependency>
-
-        <!-- Programmatic configuration and contexts -->
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-integration-jakarta</artifactId>
-        </dependency>
+        <!-- Jakarta RS Supoport for you REST APIs -->
+<!--        <dependency>-->
+<!--            <groupId>io.swagger.core.v3</groupId>-->
+<!--            <artifactId>swagger-jaxrs2-jakarta</artifactId>-->
+<!--        </dependency>-->
 
         <!-- Testing Dependencies -->
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>dev.getelements.elements</groupId>
             <artifactId>sdk-mongo-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-local</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-local-maven</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.getelements.elements</groupId>
+            <artifactId>sdk-logback</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -153,6 +160,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${elm.element.dir}/lib</outputDirectory>
+                            <excludeScope>test</excludeScope>
                             <excludeScope>provided</excludeScope>
                             <prependGroupId>true</prependGroupId>
                         </configuration>

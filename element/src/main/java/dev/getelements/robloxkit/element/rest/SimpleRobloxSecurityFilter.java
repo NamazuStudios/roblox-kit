@@ -6,10 +6,8 @@ import dev.getelements.elements.sdk.util.ThreadSafeLazyValue;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.PreMatching;
-import jakarta.ws.rs.core.HttpHeaders;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 

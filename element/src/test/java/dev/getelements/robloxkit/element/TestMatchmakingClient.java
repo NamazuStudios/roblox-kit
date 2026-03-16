@@ -102,9 +102,11 @@ public class TestMatchmakingClient {
             return userAuthResponse = httpResponse.readEntity(UserAuthResponse.class);
         } else {
 
+            final var responseText = httpResponse.readEntity(String.class);
+
             logger.error("Error response logging in {} - {}",
                     httpResponse.getStatus(),
-                    httpResponse.readEntity(String.class)
+                    responseText
             );
 
             return null;

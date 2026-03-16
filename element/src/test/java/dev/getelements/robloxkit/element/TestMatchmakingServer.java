@@ -44,9 +44,7 @@ public class TestMatchmakingServer {
 
     private static final int TEST_MONGO_PORT = 45005;
 
-    private static final String PROJECT_VERSION = System.getProperty("project.version");
-
-    private static final String PROJECT_GROUP_ID = System.getProperty("project.groupId");
+    private static final String PROJECT_VERSION = "1.0-SNAPSHOT";
 
     private static final ShutdownHooks shutdownHooks = new ShutdownHooks(TestMatchmakingServer.class);
 
@@ -76,10 +74,7 @@ public class TestMatchmakingServer {
 
         systemProperties.put(MONGO_CLIENT_URI, format("mongodb://127.0.0.1:%d", TEST_MONGO_PORT));
 
-        final var elementProperties = new Properties();
-        elementProperties.put(ROBLOX_SECRET, TEST_ROBLOX_SECRET);
-
-        final var elmArtifact = "%s:element:elm:%s".formatted(PROJECT_GROUP_ID, PROJECT_VERSION);
+        final var elmArtifact = "dev.getelements.robloxkit:element:elm:%s".formatted(PROJECT_VERSION);
 
         elementsLocal = ElementsLocalBuilder.getDefault()
                 .withProperties(systemProperties)
@@ -87,13 +82,10 @@ public class TestMatchmakingServer {
                 .withDeployment(builder -> builder
                         .elementPackage()
                         .elmArtifact(elmArtifact)
+                        .pathAttribute("dev.getelements.robloxkit.element", ROBLOX_SECRET, TEST_ROBLOX_SECRET)
                         .endElementPackage()
                         .build()
                 )
-                .withElementNamed(
-                        APPLICATION,
-                        "dev.getelements.robloxkit.element",
-                        PropertiesAttributes.wrap(elementProperties))
                 .build();
 
         application = buildApplication();

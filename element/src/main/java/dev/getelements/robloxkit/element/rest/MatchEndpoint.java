@@ -19,6 +19,8 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 public class MatchEndpoint {
 
     @POST
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
     public MatchStatusResponse findMatch(
             @Context
             final ContainerRequestContext requestContext,
@@ -34,6 +36,7 @@ public class MatchEndpoint {
 
     @GET
     @Path("{matchId}")
+    @Produces(APPLICATION_JSON)
     public MatchStatusResponse getMatchStatus(
             @Context
             final ContainerRequestContext requestContext,
