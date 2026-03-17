@@ -18,11 +18,13 @@ public class run {
                 .withSourceRoot()
                 .withDeployment(builder -> builder
                         .useDefaultRepositories(true)
-                        .elementPath()
-                            .addSpiBuiltin("DEFAULT")
-                            .addApiArtifact("dev.getelements.robloxkit:api:1.0-SNAPSHOT")
-                            .addElementArtifact("dev.getelements.robloxkit:element:1.0-SNAPSHOT")
-                        .endElementPath()
+                        .elementPackage()
+                        .elmArtifact("dev.getelements.robloxkit:element:elm:1.0-SNAPSHOT")
+                        .pathAttribute(
+                                "dev.getelements.robloxkit.element",
+                                "dev.getelements.robloxkit.secret",
+                                "supersecret")
+                        .endElementPackage()
                         .build()
                 )
                 .build();

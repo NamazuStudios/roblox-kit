@@ -1,5 +1,6 @@
 package dev.getelements.robloxkit.element.guice;
 
+import com.fasterxml.jackson.core.util.JacksonFeature;
 import com.google.inject.PrivateModule;
 import dev.getelements.robloxkit.RobloxAuthService;
 import dev.getelements.robloxkit.RobloxMatchmakingService;
@@ -14,7 +15,7 @@ public class RobloxKitModule extends PrivateModule {
     protected void configure() {
         bind(RobloxAuthService.class).to(StandardRobloxAuthService.class);
         bind(RobloxMatchmakingService.class).to(StandardRobloxMatchmakingService.class);
-        bind(Client.class).toProvider(ClientBuilder::newClient).asEagerSingleton();
+        bind(Client.class).toProvider(() -> ClientBuilder.newClient()).asEagerSingleton();
         expose(RobloxAuthService.class);
         expose(RobloxMatchmakingService.class);
     }

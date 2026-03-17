@@ -21,7 +21,7 @@
         <swagger.version>2.2.22</swagger.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <elements.version>3.7.12</elements.version>
+        <elements.version>3.8.0-SNAPSHOT</elements.version>
         <jackson.version>2.18.2</jackson.version>
         <rocoto.version>6.2</rocoto.version>
         <logback.version>1.2.3</logback.version>

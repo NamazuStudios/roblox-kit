@@ -76,10 +76,11 @@
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
-        <!-- Jakarta RS Supoport for you REST APIs -->
+
 <!--        <dependency>-->
 <!--            <groupId>io.swagger.core.v3</groupId>-->
 <!--            <artifactId>swagger-jaxrs2-jakarta</artifactId>-->
+<!--            <scope>compile</scope>-->
 <!--        </dependency>-->
 
         <!-- Testing Dependencies -->
@@ -160,8 +161,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${elm.element.dir}/lib</outputDirectory>
-                            <excludeScope>test</excludeScope>
-                            <excludeScope>provided</excludeScope>
+                            <includeScope>runtime</includeScope>
                             <prependGroupId>true</prependGroupId>
                         </configuration>
                     </execution>

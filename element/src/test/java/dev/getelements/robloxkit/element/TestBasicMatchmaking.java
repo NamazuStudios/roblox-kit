@@ -1,6 +1,5 @@
 package dev.getelements.robloxkit.element;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.getelements.elements.sdk.dao.ApplicationConfigurationDao;
 import dev.getelements.elements.sdk.model.application.MatchmakingApplicationConfiguration;
 import dev.getelements.robloxkit.model.MatchStatusResponse;
@@ -15,8 +14,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
