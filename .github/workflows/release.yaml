@@ -1,0 +1,121 @@
+name: Maven Central Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Perform a dry run (no commits, tags, or Maven Central deploy)'
+        required: false
+        default: 'false'
+
+jobs:
+  release:
+    name: Publish Maven Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21 and Maven Credentials
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Extract version info
+        id: version
+        run: |
+          set -x
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          if [[ "$VERSION" == *-SNAPSHOT ]]; then
+            RELEASE_VERSION="${VERSION%-SNAPSHOT}"
+          else
+            RELEASE_VERSION="$VERSION"
+          fi
+          IFS='.' read -r MAJOR MINOR PATCH <<<"$RELEASE_VERSION"
+          NEXT_PATCH=$((PATCH+1))
+          NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH-SNAPSHOT"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify branch is in a SNAPSHOT state
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ "$VERSION" != *-SNAPSHOT ]]; then
+            echo "::error::Expected a -SNAPSHOT version on main, but found '$VERSION'."
+            echo "The main branch must end with -SNAPSHOT before running a release."
+            echo "Please bump the version in pom.xml (e.g. mvn versions:set -DnewVersion=X.Y.Z-SNAPSHOT) and push before retrying."
+            exit 1
+          fi
+
+      - name: Show planned actions (dry run output)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          echo "==== DRY RUN MODE ===="
+          echo "Current version:    ${{ steps.version.outputs.version }}"
+          echo "Release version:    ${{ steps.version.outputs.release_version }}"
+          echo "Next snapshot:      ${{ steps.version.outputs.next_version }}"
+          echo "Would run: mvn versions:set -DnewVersion=${{ steps.version.outputs.release_version }}"
+          echo "Would tag: v${{ steps.version.outputs.release_version }}"
+          echo "Would deploy to Maven Central"
+          echo "Would create GitHub release"
+          echo "Would bump to: ${{ steps.version.outputs.next_version }}"
+          echo "No files or tags have been changed."
+
+      - name: Prepare release version (real run)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          set -x
+          mvn versions:set -DnewVersion=${{ steps.version.outputs.release_version }} -B
+          mvn versions:commit
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "Release ${{ steps.version.outputs.release_version }}"
+          git tag -a "v${{ steps.version.outputs.release_version }}" -m "Release ${{ steps.version.outputs.release_version }}"
+          git push origin "${{ github.ref_name }}"
+          git push origin "v${{ steps.version.outputs.release_version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Publish Release
+        run: mvn -B -Pcentral-publish clean deploy
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+
+      - name: Create GitHub release
+        if: ${{ success() && github.event.inputs.dry_run != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.release_version }}
+          name: Release ${{ steps.version.outputs.release_version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump to next snapshot version
+        if: ${{ success() && github.event.inputs.dry_run != 'true' }}
+        run: |
+          set -x
+          mvn versions:set -DnewVersion=${{ steps.version.outputs.next_version }} -B
+          mvn versions:commit
+          git commit -am "Start next iteration: ${{ steps.version.outputs.next_version }}"
+          git push origin "${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
