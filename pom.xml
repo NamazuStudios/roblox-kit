@@ -3,6 +3,34 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <name>Namazu Elements Roblox Kit</name>
+    <description>Roblox Integration Element for Namazu Elements</description>
+    <url>https://github.com/NamazuStudios/roblox-kit</url>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Patrick Twohig</name>
+            <email>patrick@namazustudios.com</email>
+            <organization>Namazu Studios LLC</organization>
+            <organizationUrl>https://namazustudios.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/NamazuStudios/roblox-kit</url>
+        <connection>scm:git:https://github.com/NamazuStudios/roblox-kit.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/NamazuStudios/roblox-kit.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.getelements.robloxkit</groupId>
     <artifactId>parent</artifactId>
@@ -45,6 +73,23 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- Build Source Jars -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencyManagement>
@@ -90,5 +135,49 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>central-publish</id>
+            <build>
+                <plugins>
+                    <!-- Central Publishing Plugin -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            <waitMaxTime>3600</waitMaxTime>
+                        </configuration>
+                    </plugin>
+                    <!-- GPG Plugin (Required for Maven Central) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

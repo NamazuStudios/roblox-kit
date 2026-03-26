@@ -19,7 +19,7 @@ jobs:
       - name: Get current version
         id: version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progress)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Current project version: $VERSION"
 
@@ -50,7 +50,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       - name: Build and Publish Snapshot
-        run: mvn -B -Pcentral-publish clean deploy
+        run: mvn -B --no-transfer-progress -Pcentral-publish clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}

@@ -32,7 +32,7 @@ jobs:
       - name: Get current version
         id: get_version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progress)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Current project version: $VERSION"
 
@@ -61,8 +61,8 @@ jobs:
 
       - name: Update version in POM
         run: |
-          mvn versions:set -DnewVersion=${{ steps.next_version.outputs.next }} -B
-          mvn versions:commit
+          mvn versions:set -DnewVersion=${{ steps.next_version.outputs.next }} -B --no-transfer-progress
+          mvn versions:commit --no-transfer-progress
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git commit -am "Reset to ${{ steps.next_version.outputs.next }}"
