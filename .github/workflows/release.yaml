@@ -117,9 +117,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Aggregate Javadocs
+      - name: Extract Javadocs from JARs
         if: ${{ success() && github.event.inputs.dry_run != 'true' }}
-        run: mvn -B --no-transfer-progress javadoc:aggregate -Ddoclint=none
+        run: |
+          mkdir -p target/site/apidocs
+          find . -name "*-javadoc.jar" -not -path "*/debug/*" -not -path "*/.m2/*" | while read jar; do
+            module=$(basename $(dirname $(dirname "$jar")))
+            mkdir -p "target/site/apidocs/$module"
+            unzip -q -o "$jar" -d "target/site/apidocs/$module"
+          done
 
       - name: Deploy Release Javadocs to GitHub Pages
         if: ${{ success() && github.event.inputs.dry_run != 'true' }}

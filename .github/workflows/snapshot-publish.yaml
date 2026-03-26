@@ -60,8 +60,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
-      - name: Generate Aggregate Javadocs
-        run: mvn -B --no-transfer-progress javadoc:aggregate -Ddoclint=none
+      - name: Extract Javadocs from JARs
+        run: |
+          mkdir -p target/site/apidocs
+          find . -name "*-javadoc.jar" -not -path "*/debug/*" -not -path "*/.m2/*" | while read jar; do
+            module=$(basename $(dirname $(dirname "$jar")))
+            mkdir -p "target/site/apidocs/$module"
+            unzip -q -o "$jar" -d "target/site/apidocs/$module"
+          done
 
       - name: Deploy Snapshot Javadocs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
