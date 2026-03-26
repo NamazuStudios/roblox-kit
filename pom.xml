@@ -68,8 +68,6 @@
         <servlet.api>6.1.0</servlet.api>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
         <api.classifier>${project.groupId}.api</api.classifier>
-        <kotlin.version>2.1.0</kotlin.version>
-        <dokka.version>1.9.20</dokka.version>
     </properties>
 
     <build>
@@ -98,17 +96,17 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Build Javadoc Jars using Dokka (supports Java and Kotlin sources natively) -->
+            <!-- Build Javadoc Jars (required by Maven Central) -->
             <plugin>
-                <groupId>org.jetbrains.dokka</groupId>
-                <artifactId>dokka-maven-plugin</artifactId>
-                <version>${dokka.version}</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
                         <phase>prepare-package</phase>
                         <goals>
-                            <goal>javadocJar</goal>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>

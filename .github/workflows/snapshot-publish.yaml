@@ -10,7 +10,7 @@ jobs:
   snapshot:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -59,3 +59,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Generate Aggregate Javadocs
+        run: mvn -B --no-transfer-progress javadoc:aggregate
+
+      - name: Deploy Snapshot Javadocs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site/apidocs
+          destination_dir: snapshot
+          keep_files: true
