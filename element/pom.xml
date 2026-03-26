@@ -12,6 +12,7 @@
 
     <artifactId>element</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>Roblox Kit Element</name>
 
     <properties>
         <elm.builtin.spis>DEFAULT</elm.builtin.spis>

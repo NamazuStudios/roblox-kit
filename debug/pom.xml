@@ -14,7 +14,11 @@
     <groupId>dev.getelements.robloxkit</groupId>
     <artifactId>debug</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>debug</name>
+    <name>Roblox Kit Debug</name>
+
+    <properties>
+        <skipPublishing>true</skipPublishing>
+    </properties>
 
     <!--
         Only include the local runtime and never include your element pom. The LocalSDK is just a way to run
