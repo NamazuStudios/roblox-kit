@@ -1,4 +1,4 @@
-name: Publish Snapshot to Sonatype
+name: Publish Snapshot to GitHub Packages
 
 on:
   push:
@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
 
     steps:
 
@@ -26,11 +27,9 @@ jobs:
           echo "Current project version: $VERSION"
 
       - name: Ensure Snapshot Version
-        id: next_version
         run: |
-
           CURRENT=${{ steps.version.outputs.version }}
-      
+
           # Exit if NOT a snapshot
           if [[ "$CURRENT" != *-SNAPSHOT ]]; then
             echo "::error::Expected a -SNAPSHOT version, but found '$CURRENT'."
@@ -45,22 +44,18 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-          server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: GPG_PASSPHRASE
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Install (skip tests)
         run: mvn -B --no-transfer-progress clean install -DskipTests
         env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Test and Publish Snapshot
-        run: mvn -B --no-transfer-progress -Pcentral-publish deploy
+        run: mvn -B --no-transfer-progress deploy
         env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}

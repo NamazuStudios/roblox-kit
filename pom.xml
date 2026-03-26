@@ -31,6 +31,13 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/NamazuStudios/roblox-kit</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.getelements.robloxkit</groupId>
     <artifactId>parent</artifactId>
