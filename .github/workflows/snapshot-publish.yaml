@@ -61,7 +61,7 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Generate Aggregate Javadocs
-        run: mvn -B --no-transfer-progress javadoc:aggregate
+        run: mvn -B --no-transfer-progress javadoc:aggregate -Ddoclint=none
 
       - name: Deploy Snapshot Javadocs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

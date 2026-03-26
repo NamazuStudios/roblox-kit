@@ -119,7 +119,7 @@ jobs:
 
       - name: Generate Aggregate Javadocs
         if: ${{ success() && github.event.inputs.dry_run != 'true' }}
-        run: mvn -B --no-transfer-progress javadoc:aggregate
+        run: mvn -B --no-transfer-progress javadoc:aggregate -Ddoclint=none
 
       - name: Deploy Release Javadocs to GitHub Pages
         if: ${{ success() && github.event.inputs.dry_run != 'true' }}
