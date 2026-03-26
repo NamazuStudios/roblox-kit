@@ -19,6 +19,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,19 @@ public class TestMatchmakingServer {
 
     private static final int TEST_MONGO_PORT = 45005;
 
-    private static final String PROJECT_VERSION = "1.0-SNAPSHOT";
+    private static final String PROJECT_VERSION = readProjectVersion();
+
+    private static String readProjectVersion() {
+        final var resource = "/META-INF/maven/dev.getelements.robloxkit/element/pom.properties";
+        try (final var is = TestMatchmakingServer.class.getResourceAsStream(resource)) {
+            if (is == null) throw new IllegalStateException("pom.properties not found on classpath: " + resource);
+            final var props = new Properties();
+            props.load(is);
+            return props.getProperty("version");
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read project version from " + resource, e);
+        }
+    }
 
     private static final ShutdownHooks shutdownHooks = new ShutdownHooks(TestMatchmakingServer.class);
 

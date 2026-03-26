@@ -51,8 +51,15 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Build and Publish Snapshot
-        run: mvn -B --no-transfer-progress -Pcentral-publish clean deploy
+      - name: Install (skip tests)
+        run: mvn -B --no-transfer-progress clean install -DskipTests
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+
+      - name: Test and Publish Snapshot
+        run: mvn -B --no-transfer-progress -Pcentral-publish deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}

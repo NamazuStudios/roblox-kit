@@ -40,7 +40,7 @@ jobs:
         id: version
         run: |
           set -x
-          mvn help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progressdirect
+          mvn help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progress
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout --no-transfer-progress)
           if [[ "$VERSION" == *-SNAPSHOT ]]; then
             RELEASE_VERSION="${VERSION%-SNAPSHOT}"
@@ -93,8 +93,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Publish Release
-        run: mvn -B --no-transfer-progress -Pcentral-publish clean deploy
+      - name: Install (skip tests)
+        run: mvn -B --no-transfer-progress clean install -DskipTests
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+
+      - name: Test and Publish Release
+        run: mvn -B --no-transfer-progress -Pcentral-publish deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
